@@ -27,8 +27,7 @@ class MideaAccessory {
 
     constructor(log, config) {
    
-        //this.on("ready", this.onReady.bind(this));
-        //this.on("stateChange", this.onStateChange.bind(this));
+     
         this.jar = request.jar();
         this.updateInterval = null;
         this.reauthInterval = null;
@@ -194,7 +193,7 @@ class MideaAccessory {
   handleTargetHeatingCoolingStateSet(value, callback) {
     this.log('Triggered SET TargetHeatingCoolingState:', value);
 
-    callback(null. value);
+    callback(null, value);
   }
 
   /**
@@ -408,104 +407,7 @@ class MideaAccessory {
                             body.result.list.forEach(async (currentElement) => {
                                 this.hgIdArray.push(currentElement.id);
 
-                                /*
-                                this.setObjectNotExists(currentElement.id, {
-                                    type: "device",
-                                    common: {
-                                        name: currentElement.name,
-                                        role: "indicator",
-                                    },
-                                    native: {},
-                                });
-                                Object.keys(currentElement).forEach((key) => {
-                                    this.setObjectNotExists(currentElement.id + ".general." + key, {
-                                        type: "state",
-                                        common: {
-                                            name: key,
-                                            role: "indicator",
-                                            type: typeof currentElement[key],
-                                            write: false,
-                                            read: true,
-                                        },
-                                        native: {},
-                                    });
-                                  //  this.setState(currentElement.id + ".general." + key, currentElement[key], true);
-                                });
-                                this.controls = [
-                                    { name: "powerState", type: "boolean", unit: "", role: "switch.power" },
-                                    { name: "ecoMode", type: "boolean", unit: "" },
-                                    { name: "swingMode", type: "boolean", unit: "", states: { 0x0: "Off", 0xc: "Vertical", 0x3: "Horizontal", 0xf: "Both" } },
-                                    { name: "turboMode", type: "boolean", unit: "" },
-                                    { name: "targetTemperature", type: "number", unit: "°C", role: "level.temperature" },
-                                    { name: "operationalMode", type: "number", unit: "", states: { 1: "Auto", 2: "Cool", 3: "Dry", 4: "Heat", 5: "Fan_only" } },
-                                    { name: "fanSpeed", type: "number", unit: "", states: { "102": "Auto", "20": "Silent", "40": "Low", "60": "Medium", "80": "High" } },
-                                ];
-                                for (const property of this.controls) {
-                                    await this.setObjectNotExistsAsync(currentElement.id + ".control." + property.name, {
-                                        type: "state",
-                                        common: {
-                                            name: property.name,
-                                            role: property.role || "switch",
-                                            type: property.type,
-                                            write: true,
-                                            read: true,
-                                            unit: property.unit || "",
-                                            states: property.states || null,
-                                        },
-                                        native: {},
-                                    });
-                                }
-                                this.status = [
-                                    { name: "powerState", type: "boolean", unit: "" },
-                                    { name: "ecoMode", type: "boolean", unit: "" },
-                                    { name: "swingMode", type: "boolean", unit: "", states: { 0x0: "Off", 0xc: "Vertical", 0x3: "Horizontal", 0xf: "Both" } },
-                                    { name: "turboMode", type: "boolean", unit: "" },
-                                    { name: "imodeResume", type: "boolean", unit: "" },
-                                    { name: "timerMode", type: "boolean", unit: "" },
-                                    { name: "applianceError", type: "boolean", unit: "" },
-                                    { name: "targetTemperature", type: "number", unit: "°C", role: "value.temperature" },
-                                    { name: "operationalMode", type: "number", unit: "", states: { 1: "Auto", 2: "Cool", 3: "Dry", 4: "Heat", 5: "Fan_only" } },
-                                    { name: "fanSpeed", type: "number", unit: "", states: { "102": "Auto", "20": "Silent", "40": "Low", "60": "Medium", "80": "High" } },
-                                    { name: "onTimer", type: "number", unit: "" },
-                                    { name: "offTimer", type: "number", unit: "" },
-                                    { name: "swingMode", type: "number", unit: "" },
-                                    { name: "cozySleep", type: "number", unit: "" },
-                                    { name: "tempUnit", type: "number", unit: "" },
-                                    { name: "indoorTemperature", type: "number", unit: "°C", role: "value.temperature" },
-                                    { name: "outdoorTemperature", type: "number", unit: "°C", role: "value.temperature" },
-                                    { name: "humidity", type: "number", unit: "%" },
-                                    { name: "save", type: "boolean", unit: "" },
-                                    { name: "lowFrequencyFan", type: "boolean", unit: "" },
-                                    { name: "superFan", type: "boolean", unit: "" },
-                                    { name: "feelOwn", type: "boolean", unit: "" },
-                                    { name: "childSleepMode", type: "boolean", unit: "" },
-                                    { name: "exchangeAir", type: "boolean", unit: "" },
-                                    { name: "dryClean", type: "boolean", unit: "" },
-                                    { name: "auxHeat", type: "boolean", unit: "" },
-                                    { name: "cleanUp", type: "boolean", unit: "" },
-                                    { name: "sleepFunction", type: "boolean", unit: "" },
-                                    { name: "turboMode", type: "boolean", unit: "" },
-                                    { name: "catchCold", type: "boolean", unit: "" },
-                                    { name: "nightLight", type: "boolean", unit: "" },
-                                    { name: "peakElec", type: "boolean", unit: "" },
-                                    { name: "naturalFan", type: "boolean", unit: "" },
-                                ];
-                                for (const property of this.status) {
-                                    await this.setObjectNotExistsAsync(currentElement.id + ".status." + property.name, {
-                                        type: "state",
-                                        common: {
-                                            name: property.name,
-                                            role: property.role || "indicator",
-                                            type: property.type,
-                                            write: false,
-                                            read: true,
-                                            unit: property.unit || "",
-                                            states: property.states || null,
-                                        },
-                                        native: {},
-                                    });
-                                }
-                                */
+                               
                             });
                         }
                         resolve();
@@ -794,65 +696,7 @@ class MideaAccessory {
     }
 
 
-    /**
-     * Is called if a subscribed state changes
-     * @param {string} id
-     * @param {ioBroker.State | null | undefined} state
-     */
-  /*  async onStateChange(id, state) {
-        if (state && !state.ack) {
-            const deviceId = id.split(".")[2];
-            const command = new setCommand();
-            if (id.indexOf(".control") !== -1) {
-               const powerState = await this.getStateAsync(deviceId + ".control.powerState");
-                if (powerState) command.powerState = powerState.val;
 
-                const ecoMode = await this.getStateAsync(deviceId + ".control.ecoMode");
-                if (ecoMode) command.ecoMode = ecoMode.val;
-
-                const swingMode = await this.getStateAsync(deviceId + ".control.swingMode");
-                if (swingMode) command.swingMode = swingMode.val;
-
-                const turboMode = await this.getStateAsync(deviceId + ".control.turboMode");
-                if (turboMode) command.turboMode = turboMode.val;
-
-                const targetTemperature = await this.getStateAsync(deviceId + ".control.targetTemperature");
-                if (targetTemperature) command.targetTemperature = targetTemperature.val;
-
-                const operationalMode = await this.getStateAsync(deviceId + ".control.operationalMode");
-                if (operationalMode) command.operationalMode = operationalMode.val;
-
-                const fanSpeed = await this.getStateAsync(deviceId + ".control.fanSpeed");
-                if (fanSpeed) command.fanSpeed = fanSpeed.val;
-
-                const pktBuilder = new packetBuilder();
-                pktBuilder.command = command;
-                const data = pktBuilder.finalize();
-                this.log("Command: " + JSON.stringify(command));
-                this.log("Command + Header: " + JSON.stringify(data));
-                this.sendCommand(deviceId, data).catch((error) => {
-                    this.log(error);
-                    this.log("Try to relogin");
-                    this.login()
-                        .then(() => {
-                            this.log("Login successful");
-                            this.setState("info.connection", true, true);
-                            this.sendCommand(deviceId, data).catch((error) => {
-                                this.log("Command still failed after relogin");
-                                this.setState("info.connection", false, true);
-                            });
-                        })
-                        .catch(() => {
-                            this.log("Login failed");
-                            this.setState("info.connection", false, true);
-                        });
-                });
-            }
-        } else {
-            // The state was deleted
-            // this.log(`state ${id} deleted`);
-        }
-    }*/
 
     getServices() {
     	return this.enabledServices;
