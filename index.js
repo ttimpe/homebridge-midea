@@ -581,7 +581,7 @@ class MideaAccessory {
 
                         const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
                         const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-
+                        console.log(response);
                         properties.forEach((element) => {
                             let value = response[element];
 
