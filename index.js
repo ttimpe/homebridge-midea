@@ -10,6 +10,8 @@ const request = require("request");
 const traverse = require("traverse");
 const crypto = require("crypto");
 
+const ApplianceResponse = require('./ApplianceResponse.js');
+
 let Service;
 let Characteristic;
 module.exports = function(homebridge) {
@@ -377,8 +379,8 @@ class MideaAccessory {
                     try {
                         this.log("send successful");
 
-                        const response = new applianceResponse(this.decode(this.decryptAes(body.result.reply)));
-                        const properties = Object.getOwnPropertyNames(applianceResponse.prototype).slice(1);
+                        const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
+                        const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
                         properties.forEach((element) => {
                             let value = response[element];

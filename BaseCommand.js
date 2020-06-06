@@ -1,4 +1,4 @@
-import crc8 from './crc.js';
+const crc8 = require('./crc.js');
 export default class BaseCommand {
     constructor(device_type = 0xac) {
         // More magic numbers. I'm sure each of these have a purpose, but none of it is documented in english. I might make an effort to google translate the SDK

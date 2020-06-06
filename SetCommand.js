@@ -1,4 +1,4 @@
-import BaseCommand from './BaseCommand.js'; 
+const BaseCommand = require('./BaseCommand.js'); 
 export default class SetCommand extends BaseCommand {
     constructor(device_type) {
         super(device_type);
