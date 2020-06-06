@@ -41,8 +41,106 @@ class MideaAccessory {
         this.log = log;
         this.config = config;
         this.enabledServices = [];
+
+         this.informationService = new Service.AccessoryInformation();
+        this.informationService
+        .setCharacteristic(Characteristic.Manufacturer, 'midea')
+        .setCharacteristic(Characteristic.Model, this.name)
+        .setCharacteristic(Characteristic.SerialNumber, this.id)
+        .setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
+
+        this.service = new Service.HeaterCooler();
+
+
+ this.service.getCharacteristic(this.Characteristic.CurrentHeatingCoolingState)
+        .on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
+
+      this.service.getCharacteristic(this.Characteristic.TargetHeatingCoolingState)
+        .on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
+        .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
+
+      this.service.getCharacteristic(this.Characteristic.CurrentTemperature)
+        .on('get', this.handleCurrentTemperatureGet.bind(this));
+
+      this.service.getCharacteristic(this.Characteristic.TargetTemperature)
+        .on('get', this.handleTargetTemperatureGet.bind(this))
+        .on('set', this.handleTargetTemperatureSet.bind(this));
+
+
+
+        this.enabledServices.push(this.informationService);
+        this.enabledServices.push(this.service);
+
         this.onReady();
     }
+
+    /**
+   * Handle requests to get the current value of the "Active" characteristic
+   */
+  handleActiveGet(callback) {
+    this.log.debug('Triggered GET Active');
+
+    // set this to a valid value for Active
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
+  /**
+   * Handle requests to set the "Active" characteristic
+   */
+  handleActiveSet(value, callback) {
+    this.log.debug('Triggered SET Active:', value);
+
+    callback(null);
+  }
+
+  /**
+   * Handle requests to get the current value of the "Current Heater Cooler State" characteristic
+   */
+  handleCurrentHeaterCoolerStateGet(callback) {
+    this.log.debug('Triggered GET CurrentHeaterCoolerState');
+
+    // set this to a valid value for CurrentHeaterCoolerState
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
+
+  /**
+   * Handle requests to get the current value of the "Target Heater Cooler State" characteristic
+   */
+  handleTargetHeaterCoolerStateGet(callback) {
+    this.log.debug('Triggered GET TargetHeaterCoolerState');
+
+    // set this to a valid value for TargetHeaterCoolerState
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
+  /**
+   * Handle requests to set the "Target Heater Cooler State" characteristic
+   */
+  handleTargetHeaterCoolerStateSet(value, callback) {
+    this.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+
+    callback(null);
+  }
+
+  /**
+   * Handle requests to get the current value of the "Current Temperature" characteristic
+   */
+  handleCurrentTemperatureGet(callback) {
+    this.log.debug('Triggered GET CurrentTemperature');
+
+    // set this to a valid value for CurrentTemperature
+    const currentValue = 1;
+
+    callback(null, currentValue);
+  }
+
 
     /**
      * Is called when databases are connected and adapter received configuration.
