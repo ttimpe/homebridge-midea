@@ -67,7 +67,7 @@ class MideaAccessory {
         .on('get', this.handleCurrentTemperatureGet.bind(this));
 
 
-             this.thermostatService = new this.Service(Service.Thermostat);
+             this.thermostatService = new Service.Thermostat();
 
       // create handlers for required characteristics
       this.thermostatService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
