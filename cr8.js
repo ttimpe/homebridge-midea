@@ -1,4 +1,4 @@
-export default class crc8 {
+class crc8 {
     static calculate(data) {
         const crc8_854_table = [
             0x00,
@@ -268,3 +268,4 @@ export default class crc8 {
         return crc_value;
     }
 }
+module.exports = cr8;

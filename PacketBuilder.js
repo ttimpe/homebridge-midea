@@ -26,3 +26,4 @@ class PacketBuilder {
         return 255 - (data.reduce((a, b) => a + b) % 256) + 1;
     }
 }
+module.exports = PacketBuilder;
