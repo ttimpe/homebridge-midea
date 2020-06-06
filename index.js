@@ -144,7 +144,15 @@ class MideaAccessory {
    */
   handleTargetHeaterCoolerStateSet(value, callback) {
     this.log('Triggered SET TargetHeaterCoolerState:', value);
-
+   	switch (value) {
+   		case 0:
+   			this.powerState = 0;
+   			break;
+   		default:
+   			this.powerState = 1;
+   			break;
+      	}
+      this.sendUpdateToDevice();
     callback(null, value);
   }
 
@@ -193,7 +201,15 @@ class MideaAccessory {
    */
   handleTargetHeatingCoolingStateSet(value, callback) {
     this.log('Triggered SET TargetHeatingCoolingState:', value);
-
+switch (value) {
+   		case 0:
+   			this.powerState = 0;
+   			break;
+   		default:
+   			this.powerState = 1;
+   			break;
+      	}
+      this.sendUpdateToDevice();
     callback(null, value);
   }
 
