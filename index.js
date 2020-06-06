@@ -500,13 +500,13 @@ switch (value) {
 
                         const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
                         const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-                        console.log(response);
-                        console.log('target temperature', response.targetTemperature);
+                        
+                        this.log('target temperature', response.targetTemperature);
 
                         this.targetTemperature = response.targetTemperature;
                         this.indoorTemperature = response.indoorTemperature;
                         this.powerState = response.powerState;
-                        console.log('operational mode is set to', response.operationalMode);
+                        this.log('operational mode is set to', response.operationalMode);
 
 
                         this.operationalMode = response.operationalMode;
@@ -662,7 +662,6 @@ switch (value) {
         ];
 
         const data = header.concat(updateCommand);
-        this.log('updateValues hdIdArray', this.hgIdArray);
         this.hgIdArray.forEach((element) => {
             this.sendCommand(element, data)
                 .then(() => {
