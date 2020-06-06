@@ -89,7 +89,7 @@ class MideaAccessory {
    * Handle requests to set the "Active" characteristic
    */
   handleActiveSet(value, callback) {
-    this.log.debug('Triggered SET Active:' value);
+    this.log.debug('Triggered SET Active:', value);
 
     callback(null);
   }
@@ -123,7 +123,7 @@ class MideaAccessory {
    * Handle requests to set the "Target Heater Cooler State" characteristic
    */
   handleTargetHeaterCoolerStateSet(value, callback) {
-    this.log.debug('Triggered SET TargetHeaterCoolerState:' value);
+    this.log.debug('Triggered SET TargetHeaterCoolerState:', value);
 
     callback(null);
   }
