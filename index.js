@@ -78,9 +78,9 @@ class MideaAccessory {
         .on('get', this.handleTargetTemperatureGet.bind(this))
         .on('set', this.handleTargetTemperatureSet.bind(this));
 
-      //this.thermostatService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
-       // .on('get', this.handleTemperatureDisplayUnitsGet.bind(this))
-      //  .on('set', this.handleTemperatureDisplayUnitsSet.bind(this));
+      this.thermostatService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+       .on('get', this.handleTemperatureDisplayUnitsGet.bind(this))
+       .on('set', this.handleTemperatureDisplayUnitsSet.bind(this));
 
 
 
@@ -101,7 +101,6 @@ class MideaAccessory {
     this.log.debug('Triggered GET Active');
 
     // set this to a valid value for Active
-    const currentValue = 1;
 
     callback(null, this.powerState);
   }
@@ -111,7 +110,7 @@ class MideaAccessory {
    */
   handleActiveSet(value, callback) {
     this.log.debug('Triggered SET Active:', value);
-    this.powerState= value;
+    this.powerState = value;
     callback(null, value);
   }
 
