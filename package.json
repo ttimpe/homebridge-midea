@@ -13,5 +13,6 @@
     "crypto": "^1.0.1",
     "request": "^2.88.2",
     "traverse": "^0.6.6"
-  }
+  },
+  "keywords": ["homebridge-plugin"]
 }
