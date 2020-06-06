@@ -42,6 +42,10 @@ class MideaAccessory {
         this.config = config;
         this.enabledServices = [];
 
+
+        this.targetTemperature = 0;
+        this.indoorTemperature = 0;
+
          this.informationService = new Service.AccessoryInformation();
         this.informationService
         .setCharacteristic(Characteristic.Manufacturer, 'midea')
@@ -82,7 +86,6 @@ class MideaAccessory {
 
         this.onReady();
 
-        this.targetTemperature = 0;
 
 
 
@@ -150,7 +153,7 @@ class MideaAccessory {
     this.log.debug('Triggered GET CurrentTemperature');
 
     // set this to a valid value for CurrentTemperature
-    const currentValue = 1;
+    const currentValue = this.indoorTemperature;
 
     callback(null, currentValue);
   }
@@ -189,19 +192,6 @@ class MideaAccessory {
 
     callback(null);
   }
-
-  /**
-   * Handle requests to get the current value of the "Current Temperature" characteristic
-   */
-  handleCurrentTemperatureGet(callback) {
-    this.log.debug('Triggered GET CurrentTemperature');
-
-    // set this to a valid value for CurrentTemperature
-    const currentValue = 1;
-
-    callback(null, currentValue);
-  }
-
 
   /**
    * Handle requests to get the current value of the "Target Temperature" characteristic
@@ -590,7 +580,7 @@ class MideaAccessory {
                         console.log('target temperature', response.targetTemperature);
 
                         this.targetTemperature = response.targetTemperature;
-
+                        this.indoorTemperature = response.indoorTemperature;
                         properties.forEach((element) => {
                             let value = response[element];
 
