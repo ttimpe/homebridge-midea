@@ -81,6 +81,11 @@ class MideaAccessory {
         this.enabledServices.push(this.thermostatService);
 
         this.onReady();
+
+        this.targetTemperature = 0;
+
+
+
     }
 
    /**
@@ -205,7 +210,7 @@ class MideaAccessory {
     this.log.debug('Triggered GET TargetTemperature');
 
     // set this to a valid value for TargetTemperature
-    const currentValue = 1;
+    const currentValue = this.targetTemperature;
 
     callback(null, currentValue);
   }
@@ -582,6 +587,9 @@ class MideaAccessory {
                         const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
                         const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
                         console.log(response);
+
+                        this.targetTemperature = response.targetTemperature;
+
                         properties.forEach((element) => {
                             let value = response[element];
 
