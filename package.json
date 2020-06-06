@@ -1,0 +1,17 @@
+{
+  "name": "homebridge-midea",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "request": "^2.88.2",
+    "traverse": "^0.6.6"
+  }
+}
