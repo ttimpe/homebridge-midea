@@ -165,6 +165,7 @@ class MideaAccessory {
         });
     }
     getUserList() {
+    	this.log('getUserList called');
         return new Promise((resolve, reject) => {
             const form = {
                 src: "17",
@@ -205,9 +206,10 @@ class MideaAccessory {
                     }
                     try {
                         if (body.result && body.result.list && body.result.list.length > 0) {
-                        	console.log(body.result);
+                        	this.log('getUserList result is', body.result);
                             body.result.list.forEach(async (currentElement) => {
                                 this.hgIdArray.push(currentElement.id);
+
                                 /*
                                 this.setObjectNotExists(currentElement.id, {
                                     type: "device",
@@ -533,7 +535,7 @@ class MideaAccessory {
         ];
 
         const data = header.concat(updateCommand);
-
+        this.log('updateValues hdIdArray', this.hgIdArray);
         this.hgIdArray.forEach((element) => {
             this.sendCommand(element, data)
                 .then(() => {
