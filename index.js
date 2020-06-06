@@ -122,7 +122,7 @@ class MideaAccessory {
     this.log('Triggered GET CurrentHeaterCoolerState');
 
     // set this to a valid value for CurrentHeaterCoolerState
-    const currentValue = 2;
+    const currentValue = 1;
 
     callback(null, currentValue);
   }
@@ -135,7 +135,7 @@ class MideaAccessory {
     this.log('Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
-    const currentValue = 2;
+    const currentValue = 1;
 
     callback(null, currentValue);
   }
@@ -169,7 +169,7 @@ class MideaAccessory {
     this.log('Triggered GET CurrentHeatingCoolingState');
 
     // set this to a valid value for CurrentHeatingCoolingState
-    let currentValue = 2;
+    const currentValue = 1;
 
 
 
@@ -184,7 +184,7 @@ class MideaAccessory {
     this.log('Triggered GET TargetHeatingCoolingState');
 
     // set this to a valid value for TargetHeatingCoolingState
-    let currentValue = 2;
+    let currentValue = 1;
 
     callback(null, currentValue);
   }
