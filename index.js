@@ -52,20 +52,19 @@ class MideaAccessory {
         this.service = new Service.HeaterCooler();
 
 
- this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
-        .on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
+ this.service.getCharacteristic(Characteristic.Active)
+        .on('get', this.handleActiveGet.bind(this))
+        .on('set', this.handleActiveSet.bind(this));
 
-      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
-        .on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
-        .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
+      this.service.getCharacteristic(Characteristic.CurrentHeaterCoolerState)
+        .on('get', this.handleCurrentHeaterCoolerStateGet.bind(this));
+
+      this.service.getCharacteristic(Characteristic.TargetHeaterCoolerState)
+        .on('get', this.handleTargetHeaterCoolerStateGet.bind(this))
+        .on('set', this.handleTargetHeaterCoolerStateSet.bind(this));
 
       this.service.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.handleCurrentTemperatureGet.bind(this));
-
-      this.service.getCharacteristic(Characteristic.TargetTemperature)
-        .on('get', this.handleTargetTemperatureGet.bind(this))
-        .on('set', this.handleTargetTemperatureSet.bind(this));
-
 
 
         this.enabledServices.push(this.informationService);
@@ -74,7 +73,7 @@ class MideaAccessory {
         this.onReady();
     }
 
-    /**
+   /**
    * Handle requests to get the current value of the "Active" characteristic
    */
   handleActiveGet(callback) {
@@ -90,7 +89,7 @@ class MideaAccessory {
    * Handle requests to set the "Active" characteristic
    */
   handleActiveSet(value, callback) {
-    this.log.debug('Triggered SET Active:', value);
+    this.log.debug('Triggered SET Active:' value);
 
     callback(null);
   }
@@ -98,7 +97,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Current Heater Cooler State" characteristic
    */
-  handleCurrentHeatingCoolingStateGet(callback) {
+  handleCurrentHeaterCoolerStateGet(callback) {
     this.log.debug('Triggered GET CurrentHeaterCoolerState');
 
     // set this to a valid value for CurrentHeaterCoolerState
@@ -111,7 +110,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Target Heater Cooler State" characteristic
    */
-  handleTargetHeatingCoolingStateGet(callback) {
+  handleTargetHeaterCoolerStateGet(callback) {
     this.log.debug('Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
@@ -123,8 +122,8 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Target Heater Cooler State" characteristic
    */
-  handleTargetHeatingCoolingStateSet(value, callback) {
-    this.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+  handleTargetHeaterCoolerStateSet(value, callback) {
+    this.log.debug('Triggered SET TargetHeaterCoolerState:' value);
 
     callback(null);
   }
