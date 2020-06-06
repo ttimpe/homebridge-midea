@@ -116,7 +116,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Current Heater Cooler State" characteristic
    */
   handleCurrentHeaterCoolerStateGet(callback) {
-    this.log.debug('Triggered GET CurrentHeaterCoolerState');
+    this.log('Triggered GET CurrentHeaterCoolerState');
 
     // set this to a valid value for CurrentHeaterCoolerState
     const currentValue = 1;
@@ -129,7 +129,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Target Heater Cooler State" characteristic
    */
   handleTargetHeaterCoolerStateGet(callback) {
-    this.log.debug('Triggered GET TargetHeaterCoolerState');
+    this.log('Triggered GET TargetHeaterCoolerState');
 
     // set this to a valid value for TargetHeaterCoolerState
     const currentValue = 1;
@@ -141,7 +141,7 @@ class MideaAccessory {
    * Handle requests to set the "Target Heater Cooler State" characteristic
    */
   handleTargetHeaterCoolerStateSet(value, callback) {
-    this.log.debug('Triggered SET TargetHeaterCoolerState:', value);
+    this.log('Triggered SET TargetHeaterCoolerState:', value);
 
     callback(null);
   }
@@ -150,7 +150,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
   handleCurrentTemperatureGet(callback) {
-    this.log.debug('Triggered GET CurrentTemperature');
+    this.log('Triggered GET CurrentTemperature');
 
     // set this to a valid value for CurrentTemperature
     const currentValue = this.indoorTemperature;
@@ -163,7 +163,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Current Heating Cooling State" characteristic
    */
   handleCurrentHeatingCoolingStateGet(callback) {
-    this.log.debug('Triggered GET CurrentHeatingCoolingState');
+    this.log('Triggered GET CurrentHeatingCoolingState');
 
     // set this to a valid value for CurrentHeatingCoolingState
     const currentValue = 1;
@@ -176,7 +176,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Target Heating Cooling State" characteristic
    */
   handleTargetHeatingCoolingStateGet(callback) {
-    this.log.debug('Triggered GET TargetHeatingCoolingState');
+    this.log('Triggered GET TargetHeatingCoolingState');
 
     // set this to a valid value for TargetHeatingCoolingState
     const currentValue = 1;
@@ -188,7 +188,7 @@ class MideaAccessory {
    * Handle requests to set the "Target Heating Cooling State" characteristic
    */
   handleTargetHeatingCoolingStateSet(value, callback) {
-    this.log.debug('Triggered SET TargetHeatingCoolingState:', value);
+    this.log('Triggered SET TargetHeatingCoolingState:', value);
 
     callback(null);
   }
@@ -197,7 +197,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Target Temperature" characteristic
    */
   handleTargetTemperatureGet(callback) {
-    this.log.debug('Triggered GET TargetTemperature');
+    this.log('Triggered GET TargetTemperature');
 
     // set this to a valid value for TargetTemperature
     const currentValue = this.targetTemperature;
@@ -209,7 +209,7 @@ class MideaAccessory {
    * Handle requests to set the "Target Temperature" characteristic
    */
   handleTargetTemperatureSet(value, callback) {
-    this.log.debug('Triggered SET TargetTemperature:', value);
+    this.log('Triggered SET TargetTemperature:', value);
 
     callback(null);
   }
@@ -218,7 +218,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Temperature Display Units" characteristic
    */
   handleTemperatureDisplayUnitsGet(callback) {
-    this.log.debug('Triggered GET TemperatureDisplayUnits');
+    this.log('Triggered GET TemperatureDisplayUnits');
 
     // set this to a valid value for TemperatureDisplayUnits
     const currentValue = 1;
@@ -230,7 +230,7 @@ class MideaAccessory {
    * Handle requests to set the "Temperature Display Units" characteristic
    */
   handleTemperatureDisplayUnitsSet(value, callback) {
-    this.log.debug('Triggered SET TemperatureDisplayUnits:', value);
+    this.log('Triggered SET TemperatureDisplayUnits:', value);
 
     callback(null);
   }
