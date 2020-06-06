@@ -11,6 +11,8 @@ const traverse = require("traverse");
 const crypto = require("crypto");
 
 const ApplianceResponse = require('./ApplianceResponse.js');
+const SetCommand = require('./SetCommand.js');
+const PacketBuilder = require('./PacketBuilder.js');
 
 let Service;
 let Characteristic;
@@ -770,11 +772,11 @@ class MideaAccessory {
     	command.powerState = this.powerState;
     	command.targetTemperature = this.targetTemperature;
     	const pktBuilder = new PacketBuilder();
-                pktBuilder.command = command;
-                const data = pktBuilder.finalize();
-                this.log("Command: " + JSON.stringify(command));
-                this.log("Command + Header: " + JSON.stringify(data));
-                this.sendCommand(this.hgIdArray[0], data).catch((error) => {
+        pktBuilder.command = command;
+        const data = pktBuilder.finalize();
+        this.log("Command: " + JSON.stringify(command));
+        this.log("Command + Header: " + JSON.stringify(data));
+        this.sendCommand(this.hgIdArray[0], data).catch((error) => {
                     this.log(error);
                     this.log("Try to relogin");
                     this.login()
