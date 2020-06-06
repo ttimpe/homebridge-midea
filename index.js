@@ -587,6 +587,7 @@ class MideaAccessory {
                         const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
                         const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
                         console.log(response);
+                        console.log('target temperature', response.targetTemperature);
 
                         this.targetTemperature = response.targetTemperature;
 
