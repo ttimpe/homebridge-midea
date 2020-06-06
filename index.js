@@ -184,16 +184,7 @@ class MideaAccessory {
     this.log('Triggered GET TargetHeatingCoolingState');
 
     // set this to a valid value for TargetHeatingCoolingState
-    let currentValue = 1;
-
-    switch (this.operationalMode) {
-    	case 2:
-    	 currentValue = Characteristic.TargetHeatingCoolingState.Auto;
-    	 break;
-    	default:
-    	  currentValue = Characteristic.TargetHeatingCoolingState.Cool;
-    	  break;
-    }
+    let currentValue = 2;
 
     callback(null, currentValue);
   }
