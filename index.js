@@ -45,6 +45,8 @@ class MideaAccessory {
 
         this.targetTemperature = 0;
         this.indoorTemperature = 0;
+        this.powerState = Characteristic.Active.INACTIVE;
+        this.operationalMode = 0;
 
          this.informationService = new Service.AccessoryInformation();
         this.informationService
@@ -100,7 +102,7 @@ class MideaAccessory {
     // set this to a valid value for Active
     const currentValue = 1;
 
-    callback(null, currentValue);
+    callback(null, this.powerState);
   }
 
   /**
@@ -108,8 +110,8 @@ class MideaAccessory {
    */
   handleActiveSet(value, callback) {
     this.log.debug('Triggered SET Active:', value);
-
-    callback(null);
+    this.powerState= value;
+    callback(null, value);
   }
 
   /**
@@ -581,6 +583,10 @@ class MideaAccessory {
 
                         this.targetTemperature = response.targetTemperature;
                         this.indoorTemperature = response.indoorTemperature;
+                        this.powerState = response.powerState;
+                        console.log('operational mode is set to', response.operationalMode);
+                        this.operationalMode = response.operationalMode;
+
                         properties.forEach((element) => {
                             let value = response[element];
 
