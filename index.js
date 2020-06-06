@@ -388,13 +388,13 @@ class MideaAccessory {
                             if (typeof value === "object" && value !== null) {
                                 value = JSON.stringify(value);
                             }
-                            this.setState(applianceId + ".status." + element, value, true);
+                           // this.setState(applianceId + ".status." + element, value, true);
                             if (
                                 this.controls.some((k) => {
                                     return k.name === element;
                                 })
                             ) {
-                                this.setState(applianceId + ".control." + element, value, true);
+                               // this.setState(applianceId + ".control." + element, value, true);
                             }
                         });
                         resolve();
