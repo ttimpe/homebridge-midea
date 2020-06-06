@@ -268,4 +268,4 @@ class crc8 {
         return crc_value;
     }
 }
-module.exports = cr8;
+module.exports = crc8;
