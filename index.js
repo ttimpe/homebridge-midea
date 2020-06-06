@@ -52,17 +52,17 @@ class MideaAccessory {
         this.service = new Service.HeaterCooler();
 
 
- this.service.getCharacteristic(this.Characteristic.CurrentHeatingCoolingState)
+ this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
         .on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
 
-      this.service.getCharacteristic(this.Characteristic.TargetHeatingCoolingState)
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
         .on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
         .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
 
-      this.service.getCharacteristic(this.Characteristic.CurrentTemperature)
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
         .on('get', this.handleCurrentTemperatureGet.bind(this));
 
-      this.service.getCharacteristic(this.Characteristic.TargetTemperature)
+      this.service.getCharacteristic(Characteristic.TargetTemperature)
         .on('get', this.handleTargetTemperatureGet.bind(this))
         .on('set', this.handleTargetTemperatureSet.bind(this));
 
