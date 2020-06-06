@@ -212,7 +212,8 @@ class MideaAccessory {
    */
   handleTargetTemperatureSet(value, callback) {
     this.log('Triggered SET TargetTemperature:', value);
-
+    this.targetTemperature = value;
+    this.sendUpdateToDevice();
     callback(null);
   }
 
@@ -585,6 +586,8 @@ class MideaAccessory {
                         this.indoorTemperature = response.indoorTemperature;
                         this.powerState = response.powerState;
                         console.log('operational mode is set to', response.operationalMode);
+
+
                         this.operationalMode = response.operationalMode;
 
                         properties.forEach((element) => {
@@ -762,6 +765,31 @@ class MideaAccessory {
     }
 
   
+    sendUpdateToDevice() {
+    	const command = new SetCommand();
+    	command.powerState = this.powerState;
+    	command.targetTemperature = this.targetTemperature;
+    	const pktBuilder = new PacketBuilder();
+                pktBuilder.command = command;
+                const data = pktBuilder.finalize();
+                this.log("Command: " + JSON.stringify(command));
+                this.log("Command + Header: " + JSON.stringify(data));
+                this.sendCommand(this.hgIdArray[0], data).catch((error) => {
+                    this.log(error);
+                    this.log("Try to relogin");
+                    this.login()
+                        .then(() => {
+                            this.log("Login successful");
+                            this.sendCommand(this.deviceId, data).catch((error) => {
+                                this.log("Command still failed after relogin");
+                            });
+                        })
+                        .catch(() => {
+                            this.log("Login failed");
+                            this.setState("info.connection", false, true);
+                        });
+                });
+    }
 
 
     /**
