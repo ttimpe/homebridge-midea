@@ -1,5 +1,5 @@
 class Utils {
- encode(data) {
+ static encode(data) {
      	const normalized = [];
      	for (let b of data) {
      		b = parseInt(b);
@@ -12,7 +12,7 @@ class Utils {
      }
    
      
-    decode(data) {
+    static decode(data) {
      	const normalized = [];
      	for (let b of data) {
      		b = parseInt(b);
@@ -23,7 +23,7 @@ class Utils {
      	}
      	return normalized;
      }
-       getStamp() {
+     static getStamp() {
      	const date = new Date();
      	return date.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
      }
