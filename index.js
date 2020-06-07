@@ -662,7 +662,6 @@ class MideaAccessory {
      		})
      		.catch(() => {
      			this.log("Login failed");
-     			this.setState("info.connection", false, true);
      		});
      	});
      }
