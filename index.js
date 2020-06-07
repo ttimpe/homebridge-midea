@@ -10,9 +10,13 @@ const request = require("request");
 const traverse = require("traverse");
 const crypto = require("crypto");
 
+
+const Utils = require('./Utils.js');
 const ApplianceResponse = require('./ApplianceResponse.js');
 const SetCommand = require('./SetCommand.js');
 const PacketBuilder = require('./PacketBuilder.js');
+
+
 
 let Service;
 let Characteristic;
@@ -265,7 +269,7 @@ class MideaAccessory {
      			src: "17",
      			appId: "1117",
      			format: "2",
-     			stamp: this.getStamp(),
+     			stamp: Utils.getStamp(),
      			language: "de_DE",
      		};
      		const url = "https://mapp.appsmb.com/v1/user/login/id/get";
@@ -304,7 +308,7 @@ class MideaAccessory {
      					loginAccount: this.config['user'],
      					src: "17",
      					format: "2",
-     					stamp: this.getStamp(),
+     					stamp: Utils.getStamp(),
      					language: "de_DE",
      					password: password,
      					clientType: "1",
@@ -358,7 +362,7 @@ class MideaAccessory {
      		const form = {
      			src: "17",
      			format: "2",
-     			stamp: this.getStamp(),
+     			stamp: Utils.getStamp(),
      			language: "de_DE",
      			sessionId: this.sId,
      		};
@@ -413,7 +417,7 @@ class MideaAccessory {
      }
      sendCommand(applianceId, order) {
      	return new Promise((resolve, reject) => {
-     		const orderEncode = this.encode(order);
+     		const orderEncode = Utils.encode(order);
      		const orderEncrypt = this.encryptAes(orderEncode);
 
      		const form = {
@@ -422,7 +426,7 @@ class MideaAccessory {
      			format: "2",
                 funId: "FC02", //maybe it is also "0000"
                 order: orderEncrypt,
-                stamp: this.getStamp(),
+                stamp: Utils.getStamp(),
                 language: "de_DE",
                 sessionId: this.sId,
             };
@@ -472,7 +476,7 @@ class MideaAccessory {
             	try {
             		this.log("send successful");
 
-            		const response = new ApplianceResponse(this.decode(this.decryptAes(body.result.reply)));
+            		const response = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
             		const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
             		this.log('target temperature', response.targetTemperature);
@@ -530,10 +534,7 @@ class MideaAccessory {
      	.update(loginId + pw + this.appKey)
      	.digest("hex");
      }
-     getStamp() {
-     	const date = new Date();
-     	return date.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
-     }
+   
 
      generateDataKey() {
      	const md5AppKey = crypto.createHash("md5").update(this.appKey).digest("hex");
@@ -550,28 +551,8 @@ class MideaAccessory {
      	const dec = decipher.update(reply, "hex", "utf8");
      	return dec.split(",");
      }
-     encode(data) {
-     	const normalized = [];
-     	for (let b of data) {
-     		b = parseInt(b);
-     		if (b >= 128) {
-     			b = b - 256;
-     		}
-     		normalized.push(b);
-     	}
-     	return normalized;
-     }
-     decode(data) {
-     	const normalized = [];
-     	for (let b of data) {
-     		b = parseInt(b);
-     		if (b < 0) {
-     			b = b + 256;
-     		}
-     		normalized.push(b);
-     	}
-     	return normalized;
-     }
+    
+   
      encryptAes(query) {
      	if (!this.dataKey) {
      		this.generateDataKey();
