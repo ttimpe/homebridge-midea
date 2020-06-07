@@ -98,7 +98,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Active" characteristic
    */
    handleActiveGet(callback) {
-   	this.log.debug('Triggered GET Active');
+   	this.log.debug('Triggered GET Active, returning', this.powerState);
 
     // set this to a valid value for Active
 
