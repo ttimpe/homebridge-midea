@@ -476,7 +476,7 @@ class MideaAccessory {
             		this.targetTemperature = response.targetTemperature;
             		this.indoorTemperature = response.indoorTemperature;
             		this.powerState = response.powerState;
-            		this.log('powerState is set to', Charateristic.Active[response.powerState]);
+            		this.log('powerState is set to', Characteristic.Active[response.powerState]);
             		this.log('operational mode is set to', response.operationalMode);
 
 
