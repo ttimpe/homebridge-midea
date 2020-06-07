@@ -156,7 +156,7 @@ class MideaAccessory {
    * Handle requests to get the current value of the "Target Heating Cooling State" characteristic
    */
    handleTargetHeatingCoolingStateGet(callback) {
-   	this.log('Triggered GET TargetHeatingCoolingState');
+   	this.log('Triggered GET TargetHeatingCoolingState while powerState is', this.powerState);
 
     // set this to a valid value for TargetHeatingCoolingState
     let currentValue = 2;
