@@ -138,7 +138,11 @@ class MideaAccessory {
    	this.log('Triggered GET CurrentHeatingCoolingState');
 
     // set this to a valid value for CurrentHeatingCoolingState
-    const currentValue = 2;
+
+    let currentValue = 2;
+    if (this.powerState === 0) {
+    	currentValue = 0;
+    }
 
 
 
@@ -154,7 +158,9 @@ class MideaAccessory {
 
     // set this to a valid value for TargetHeatingCoolingState
     let currentValue = 2;
-
+    if (this.powerState === 0) {
+    	currentValue = 0;
+    }
     callback(null, currentValue);
 }
 
