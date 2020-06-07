@@ -1,21 +1,18 @@
 {
   "name": "homebridge-midea",
   "version": "1.0.0",
-  "description": "",
+  "description": "Homebridge plugin for Midea AC units",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "engines": {
-    "node": ">=8.0.0",
-    "homebridge": ">=0.4.46"
+    "node": ">=12.0.0",
+    "homebridge": ">=1.0.0"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "ttimpe",
+  "license": "MIT",
   "dependencies": {
     "crypto": "^1.0.1",
     "request": "^2.88.2",
     "traverse": "^0.6.6"
   },
-  "keywords": ["homebridge-plugin"]
+  "keywords": ["homebridge", "homebridge-plugin", "midea", "comfee", "homekit", "air conditioner"]
 }
