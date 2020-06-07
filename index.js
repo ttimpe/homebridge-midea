@@ -46,7 +46,7 @@ class MideaAccessory {
 
 		this.targetTemperature = 0;
 		this.indoorTemperature = 0;
-		this.powerState = Characteristic.Active.INACTIVE;
+		this.powerState = 0;
 		this.operationalMode = 0;
 
 		this.informationService = new Service.AccessoryInformation();
@@ -101,8 +101,12 @@ class MideaAccessory {
    	this.log.debug('Triggered GET Active, returning', this.powerState);
 
     // set this to a valid value for Active
+    if (this.powerState) {
+    	callback(null, Characteristic.Active.ACTIVE);
+    } else {
+    	callback(null, Characteristic.Active.INACTIVE);
+    }
 
-    callback(null, this.powerState);
 }
 
   /**
@@ -142,7 +146,7 @@ class MideaAccessory {
     // set this to a valid value for CurrentHeatingCoolingState
 
     let currentValue = Characteristic.CurrentHeatingCoolingState.COOL;
-    if (this.powerState === Characteristic.Active.INACTIVE) {
+    if (this.powerState == Characteristic.Active.INACTIVE) {
     	currentValue = Characteristic.CurrentHeatingCoolingState.OFF;
     }
 
@@ -160,7 +164,7 @@ class MideaAccessory {
 
     // set this to a valid value for TargetHeatingCoolingState
     let currentValue = Characteristic.TargetHeatingCoolingState.COOL;
-    if (this.powerState === Characteristic.Active.INACTIVE) {
+    if (this.powerState == Characteristic.Active.INACTIVE) {
     	currentValue = Characteristic.TargetHeatingCoolingState.OFF;
     }
     callback(null, currentValue);
@@ -476,7 +480,7 @@ class MideaAccessory {
             		this.targetTemperature = response.targetTemperature;
             		this.indoorTemperature = response.indoorTemperature;
             		this.powerState = response.powerState;
-            		this.log('powerState is set to', Characteristic.Active[response.powerState]);
+            		this.log('powerState is set to', response.powerState);
             		this.log('operational mode is set to', response.operationalMode);
 
 
