@@ -110,8 +110,10 @@ class MideaAccessory {
    */
    handleActiveSet(value, callback) {
    	this.log.debug('Triggered SET Active:', value);
-   	this.powerState = value;
-   	this.sendUpdateToDevice();
+   	if (this.powerState != value) {
+   		this.powerState = value;
+   		this.sendUpdateToDevice();
+   	}
    	callback(null, value);
    }
 
@@ -169,6 +171,7 @@ class MideaAccessory {
    */
    handleTargetHeatingCoolingStateSet(value, callback) {
    	this.log('Triggered SET TargetHeatingCoolingState:', value);
+
    	switch (value) {
    		case 0:
    		this.powerState = 0;
@@ -198,8 +201,10 @@ class MideaAccessory {
    */
    handleTargetTemperatureSet(value, callback) {
    	this.log('Triggered SET TargetTemperature:', value);
-   	this.targetTemperature = value;
-   	this.sendUpdateToDevice();
+   	if (this.targetTemperature != value) {
+   		this.targetTemperature = value;
+   		this.sendUpdateToDevice();
+   	}
    	callback(null, value);
    }
 
