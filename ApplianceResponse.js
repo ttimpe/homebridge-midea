@@ -97,7 +97,7 @@ class ApplianceResponse {
     }
 
     get dryClean() {
-        // This needs a better name, dunno what it actually means
+        // This actually means 13°C(55°F)~35°C(95°F) according to my manual. Also dehumidifying.
         return (this.data[0x09] & 0x04) > 0;
     }
 
