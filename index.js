@@ -566,6 +566,7 @@ class MideaAccessory {
             		});
             		resolve();
             	} catch (error) {
+                this.log(body);
             		this.log(error);
 
             		this.log(error.stack);
