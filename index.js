@@ -52,6 +52,8 @@ class MideaAccessory {
 		this.indoorTemperature = 0;
 		this.powerState = 0;
 		this.operationalMode = 0;
+		this.swingMode = 0;
+		this.fanSpeed = 0;
 
 		this.informationService = new Service.AccessoryInformation();
 		this.informationService
@@ -65,31 +67,42 @@ class MideaAccessory {
 
 
 
-		this.thermostatService = new Service.Thermostat();
+		//this.thermostatService = new Service.Thermostat();
 
-      // create handlers for required characteristics
-      this.thermostatService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+	  // create handlers for required characteristics
+	  this.service.getCharacteristic(this.Characteristic.Active)
+        .on('get', this.handleActiveGet.bind(this))
+        .on('set', this.handleActiveSet.bind(this));
+
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
       .on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+      this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
       .on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
       .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.CurrentTemperature)
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
       .on('get', this.handleCurrentTemperatureGet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.TargetTemperature)
-      .on('get', this.handleTargetTemperatureGet.bind(this))
-      .on('set', this.handleTargetTemperatureSet.bind(this));
+      this.service.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+      .on('get', this.handleCoolingThresholdTemperatureGet.bind(this))
+      .on('set', this.handleCoolingThresholdTemperatureSet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+      this.service.getCharacteristic(Characteristic.TemperatureDisplayUnits)
       .on('get', this.handleTemperatureDisplayUnitsGet.bind(this))
       .on('set', this.handleTemperatureDisplayUnitsSet.bind(this));
 
+      this.service.getCharacteristic(Characteristic.SwingMode)
+      .on('get', this.handleSwingModeGet.bind(this))
+      .on('set', this.handleSwingModeSet.bind(this));
+
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', this.handleRotationSpeedGet.bind(this))
+      .on('set', this.handleRotationSpeedSet.bind(this));
 
 
       this.enabledServices.push(this.informationService);
-      this.enabledServices.push(this.thermostatService);
+      this.enabledServices.push(this.service);
 
       this.onReady();
 
@@ -195,8 +208,8 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Target Temperature" characteristic
    */
-   handleTargetTemperatureGet(callback) {
-   	this.log('Triggered GET TargetTemperature');
+  	handleCoolingThresholdTemperatureGet(callback) {
+   	this.log('Triggered GET handleCoolingThresholdTemperature');
 
     // set this to a valid value for TargetTemperature
     const currentValue = this.targetTemperature;
@@ -207,8 +220,8 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Target Temperature" characteristic
    */
-   handleTargetTemperatureSet(value, callback) {
-   	this.log('Triggered SET TargetTemperature:', value);
+  	handleCoolingThresholdTemperatureSet(value, callback) {
+   	this.log('Triggered SET handleCoolingThresholdTemperature:', value);
    	if (this.targetTemperature != value) {
    		this.targetTemperature = value;
    		this.sendUpdateToDevice();
@@ -236,6 +249,55 @@ class MideaAccessory {
 
    	callback(null);
    }
+
+   /**
+   * Handle requests to get the current value of the "swingMode" characteristic
+   */
+	handleSwingModeGet(callback) {
+		this.log('Triggered GET swingMode');
+
+	// set this to a valid value for swingMode
+	const currentValue = this.swingMode;
+
+	callback(null, currentValue);
+	}
+
+	/**
+	* Handle requests to set the "swingMode" characteristic
+	*/
+	handleSwingModeSet(value, callback) {
+		this.log('Triggered SET swingMode:', value);
+		if (this.swingMode != value) {
+			this.swingMode = value;
+			this.sendUpdateToDevice();
+		}
+		callback(null, value);
+	}
+   
+
+   /**
+   * Handle requests to get the current value of the "RotationSpeed" characteristic
+   */
+	handleRotationSpeedGet(callback) {
+		this.log('Triggered GET RotationSpeed');
+
+	// set this to a valid value for RotationSpeed
+	const currentValue = this.fanSpeed;
+
+	callback(null, currentValue);
+	}
+
+	/**
+	* Handle requests to set the "RotationSpeed" characteristic
+	*/
+	handleRotationSpeedSet(value, callback) {
+		this.log('Triggered SET RotationSpeed:', value);
+		if (this.fanSpeed != value) {
+			this.fanSpeed = value;
+			this.sendUpdateToDevice();
+		}
+		callback(null, value);
+	}
 
 
 
@@ -482,8 +544,12 @@ class MideaAccessory {
             		this.log('target temperature', response.targetTemperature);
 
             		this.targetTemperature = response.targetTemperature;
-            		this.indoorTemperature = response.indoorTemperature;
-            		this.powerState = response.powerState;
+					this.indoorTemperature = response.indoorTemperature;
+					this.fanSpeed = response.fanSpeed;
+					this.powerState = response.powerState;
+					this.swingMode = response.swingMode;
+            		this.log('fanSpeed is set to', response.fanSpeed);
+            		this.log('swingMode is set to', response.swingMode);
             		this.log('powerState is set to', response.powerState);
             		this.log('operational mode is set to', response.operationalMode);
 
@@ -644,7 +710,9 @@ class MideaAccessory {
      sendUpdateToDevice() {
      	const command = new SetCommand();
      	command.powerState = this.powerState;
-     	command.targetTemperature = this.targetTemperature;
+		command.targetTemperature = this.targetTemperature;
+		command.swingMode = this.swingMode;
+		command.fanSpeed = this.fanSpeed;
      	const pktBuilder = new PacketBuilder();
      	pktBuilder.command = command;
      	const data = pktBuilder.finalize();
