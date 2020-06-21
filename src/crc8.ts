@@ -1,6 +1,6 @@
 import Constants from './Constants'
 export default class crc8 {
-    static calculate(data) {
+    static calculate(data: any) {
         let crc_value = 0;
         for (const m of data) {
             let k = crc_value ^ m;

@@ -27,27 +27,28 @@ export default function(homebridge : any) {
 
 class MideaAccessory {
 
-	updateInterval: number
-	reauthInterval: number
-	atoken: string
-	sId: string
-	hgIdArray: number[]
+	updateInterval: any
+	reauthInterval: any
+	atoken: string = ''
+	sId: string = ''
+	hgIdArray: number[] = []
 	
-	enabledServices: any[]
-	targetTemperature: number
-	indoorTemperature: number
-	outdoorTemperature: number
-	powerState: number
-	operationalMode: number
+	enabledServices: any[] = [];
+	targetTemperature: number = 0
+	indoorTemperature: number = 0
+	outdoorTemperature: number = 0
+	powerState: number = 0
+	operationalMode: number = 0
 	informationService: any
 	thermostatService: any
 	log: any;
-	baseHeader: any
+	baseHeader: object = {}
 	jar: any
 	config: any
 	deviceId: any
+	dataKey : string = '';
 
-	constructor(log, config) {
+	constructor(log : any, config: any) {
 
 
 		this.jar = request.jar();
@@ -64,8 +65,8 @@ class MideaAccessory {
 		this.informationService = new Service.AccessoryInformation();
 		this.informationService
 		.setCharacteristic(Characteristic.Manufacturer, 'midea')
-		.setCharacteristic(Characteristic.Model, this.name)
-		.setCharacteristic(Characteristic.SerialNumber, this.id)
+		.setCharacteristic(Characteristic.Model, this.config['name'])
+		.setCharacteristic(Characteristic.SerialNumber, '0')
 		.setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
 
 	
@@ -108,7 +109,7 @@ class MideaAccessory {
    /**
    * Handle requests to get the current value of the "Active" characteristic
    */
-   handleActiveGet(callback) {
+   handleActiveGet(callback : Function) {
 	this.log.debug('Triggered GET Active, returning', this.powerState);
 
 		// set this to a valid value for Active
@@ -122,7 +123,7 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Active" characteristic
    */
-   handleActiveSet(value, callback) {
+   handleActiveSet(value : number, callback: Function) {
 	this.log.debug('Triggered SET Active:', value);
 	if (this.powerState != value) {
 		this.powerState = value;
@@ -137,7 +138,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Current Temperature" characteristic
    */
-   handleCurrentTemperatureGet(callback) {
+   handleCurrentTemperatureGet(callback: Function) {
 	this.log('Triggered GET CurrentTemperature');
 
 	// set this to a valid value for CurrentTemperature
@@ -150,7 +151,7 @@ class MideaAccessory {
 /**
    * Handle requests to get the current value of the "Current Heating Cooling State" characteristic
    */
-   handleCurrentHeatingCoolingStateGet(callback) {
+   handleCurrentHeatingCoolingStateGet(callback: Function) {
 	this.log('Triggered GET CurrentHeatingCoolingState');
 
 	// set this to a valid value for CurrentHeatingCoolingState
@@ -169,7 +170,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Target Heating Cooling State" characteristic
    */
-   handleTargetHeatingCoolingStateGet(callback) {
+   handleTargetHeatingCoolingStateGet(callback :Function) {
 	this.log('Triggered GET TargetHeatingCoolingState while powerState is', this.powerState);
 
 	// set this to a valid value for TargetHeatingCoolingState
@@ -183,7 +184,7 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Target Heating Cooling State" characteristic
    */
-   handleTargetHeatingCoolingStateSet(value, callback) {
+   handleTargetHeatingCoolingStateSet(value: number, callback: Function) {
 	this.log('Triggered SET TargetHeatingCoolingState:', value);
 
 	switch (value) {
@@ -201,7 +202,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Target Temperature" characteristic
    */
-   handleTargetTemperatureGet(callback) {
+   handleTargetTemperatureGet(callback: Function) {
 	this.log('Triggered GET TargetTemperature');
 
 	// set this to a valid value for TargetTemperature
@@ -213,7 +214,7 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Target Temperature" characteristic
    */
-   handleTargetTemperatureSet(value, callback) {
+   handleTargetTemperatureSet(value: number, callback: Function) {
 	this.log('Triggered SET TargetTemperature:', value);
 	if (this.targetTemperature != value) {
 		this.targetTemperature = value;
@@ -225,7 +226,7 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Temperature Display Units" characteristic
    */
-   handleTemperatureDisplayUnitsGet(callback) {
+   handleTemperatureDisplayUnitsGet(callback: Function) {
 	this.log('Triggered GET TemperatureDisplayUnits');
 
 	// set this to a valid value for TemperatureDisplayUnits
@@ -237,7 +238,7 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Temperature Display Units" characteristic
    */
-   handleTemperatureDisplayUnitsSet(value, callback) {
+   handleTemperatureDisplayUnitsSet(value: number, callback : Function) {
 	this.log('Triggered SET TemperatureDisplayUnits:', value);
 
 	callback(null);
@@ -269,7 +270,7 @@ class MideaAccessory {
    login() {
 	return new Promise((resolve, reject) => {
 		this.jar = request.jar();
-		const form = {
+		const form : any = {
 			loginAccount: this.config.user,
 			clientType: "1",
 			src: "17",
@@ -291,7 +292,7 @@ class MideaAccessory {
 			jar: this.jar,
 			gzip: true,
 		},
-		(err, resp, body) => {
+		(err :any, resp :any, body :any) => {
 			if (err || (resp && resp.statusCode >= 400) || !body) {
 				this.log("Failed to login");
 				err && this.log(err);
@@ -310,7 +311,7 @@ class MideaAccessory {
 			if (body.result) {
 				const loginId = body.result.loginId;
 				const password = this.getSignPassword(loginId);
-				const form = {
+				const form :any = {
 					loginAccount: this.config['user'],
 					src: "17",
 					format: "2",
@@ -333,7 +334,7 @@ class MideaAccessory {
 					jar: this.jar,
 					gzip: true,
 				},
-				(err, resp, body) => {
+				(err: any, resp: any, body: any) => {
 					if (err || (resp && resp.statusCode >= 400) || !body) {
 						this.log("Failed to login");
 						err && this.log(err);
@@ -365,7 +366,7 @@ class MideaAccessory {
    getUserList() {
 	this.log('getUserList called');
 	return new Promise((resolve, reject) => {
-		const form = {
+		const form : any = {
 			src: "17",
 			format: "2",
 			stamp: Utils.getStamp(),
@@ -385,7 +386,7 @@ class MideaAccessory {
 			jar: this.jar,
 			gzip: true,
 		},
-		(err, resp, body) => {
+		(err: any, resp: any, body: any) => {
 			if (err || (resp && resp.statusCode >= 400) || !body) {
 				this.log("Failed to login");
 				err && this.log(err);
@@ -405,7 +406,7 @@ class MideaAccessory {
 			try {
 				if (body.result && body.result.list && body.result.list.length > 0) {
 					this.log('getUserList result is', body.result);
-					body.result.list.forEach(async (currentElement) => {
+					body.result.list.forEach(async (currentElement: any) => {
 						this.hgIdArray.push(currentElement.id);
 					});
 				}
@@ -419,12 +420,12 @@ class MideaAccessory {
 		);
 	});
    }
-   sendCommand(applianceId, order) {
+   sendCommand(applianceId: any, order : any) {
 	return new Promise((resolve, reject) => {
 		const orderEncode = Utils.encode(order);
 		const orderEncrypt = this.encryptAes(orderEncode);
 
-		const form = {
+		const form :any = {
 			applianceId: applianceId,
 			src: "17",
 			format: "2",
@@ -447,7 +448,7 @@ class MideaAccessory {
 				jar: this.jar,
 				gzip: true,
 			},
-			(err, resp, body) => {
+			(err : any, resp: any, body: any) => {
 				if (err || (resp && resp.statusCode >= 400) || !body) {
 					this.log("Failed to send command");
 					err && this.log(err);
@@ -480,7 +481,7 @@ class MideaAccessory {
 				try {
 					this.log("send successful");
 
-					const response = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
+					const response :any = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
 					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
 					this.log('target temperature', response.targetTemperature);
@@ -494,8 +495,8 @@ class MideaAccessory {
 
 					this.operationalMode = response.operationalMode;
 
-					properties.forEach((element) => {
-						let value = response[element];
+					properties.forEach((element: any) => {
+						let value :any = response[element];
 
 						if (typeof value === "object" && value !== null) {
 							value = JSON.stringify(value);
@@ -514,12 +515,12 @@ class MideaAccessory {
 			);
 		});
    }
-   getSign(path, form) {
+   getSign(path: string, form: any) {
 	const postfix = "/" + path.split("/").slice(3).join("/");
-	const ordered = {};
+	const ordered : any = {}
 	Object.keys(form)
 	.sort()
-	.forEach(function (key) {
+	.forEach(function (key: any) {
 		ordered[key] = form[key];
 	});
 	const query = Object.keys(ordered)
@@ -528,27 +529,27 @@ class MideaAccessory {
 
 	return crypto
 	.createHash("sha256")
-	.update(postfix + query + this.appKey)
+	.update(postfix + query + Constants.AppKey)
 	.digest("hex");
    }
-   getSignPassword(loginId) {
+   getSignPassword(loginId : string) {
 	const pw = crypto.createHash("sha256").update(this.config.password).digest("hex");
 
 	return crypto
 	.createHash("sha256")
-	.update(loginId + pw + this.appKey)
+	.update(loginId + pw + Constants.AppKey)
 	.digest("hex");
    }
    
 
    generateDataKey() {
-	const md5AppKey = crypto.createHash("md5").update(this.appKey).digest("hex");
+	const md5AppKey = crypto.createHash("md5").update(Constants.AppKey).digest("hex");
 	const decipher = crypto.createDecipheriv("aes-128-ecb", md5AppKey.slice(0, 16), "");
 	const dec = decipher.update(this.atoken, "hex", "utf8");
 	this.dataKey = dec;
 	return dec;
    }
-   decryptAes(reply) {
+   decryptAes(reply: number[]) {
 	if (!this.dataKey) {
 		this.generateDataKey();
 	}
@@ -558,7 +559,7 @@ class MideaAccessory {
    }
 
 
-   encryptAes(query) {
+   encryptAes(query: number[]) {
 	if (!this.dataKey) {
 		this.generateDataKey();
 	}

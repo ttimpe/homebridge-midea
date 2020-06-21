@@ -14,5 +14,18 @@
     "request": "^2.88.2",
     "traverse": "^0.6.6"
   },
-  "keywords": ["homebridge", "homebridge-plugin", "midea", "comfee", "homekit", "air conditioner"]
+  "keywords": [
+    "homebridge",
+    "homebridge-plugin",
+    "midea",
+    "comfee",
+    "homekit",
+    "air conditioner"
+  ],
+  "devDependencies": {
+    "typescript": "^3.9.5"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
 }

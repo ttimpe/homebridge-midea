@@ -1,8 +1,7 @@
 export default class Utils {
- static encode(data) : number[] {
+ static encode(data: number[]) : number[] {
      	const normalized = [];
      	for (let b of data) {
-     		b = parseInt(b);
      		if (b >= 128) {
      			b = b - 256;
      		}
@@ -12,10 +11,10 @@ export default class Utils {
      }
    
      
-    static decode(data) : number[] {
+    static decode(data: number[]) : number[] {
      	const normalized = [];
      	for (let b of data) {
-     		b = parseInt(b);
+     		
      		if (b < 0) {
      			b = b + 256;
      		}
