@@ -7,7 +7,7 @@ const crypto = require("crypto");
 
 
 import Constants from './Constants'
-import Utils from './utils';
+import Utils from './Utils';
 import ApplianceResponse from './ApplianceResponse';
 import SetCommand from './SetCommand';
 import PacketBuilder from './PacketBuilder';
