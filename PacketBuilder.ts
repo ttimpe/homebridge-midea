@@ -1,4 +1,7 @@
-class PacketBuilder {
+import BaseCommand from './BaseCommand';
+export default class PacketBuilder {
+    _command: BaseCommand;
+    packet: number[];
     constructor() {
         this._command = null;
 
@@ -26,4 +29,3 @@ class PacketBuilder {
         return 255 - (data.reduce((a, b) => a + b) % 256) + 1;
     }
 }
-module.exports = PacketBuilder;

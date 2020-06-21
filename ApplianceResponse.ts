@@ -1,4 +1,5 @@
-class ApplianceResponse {
+export default class ApplianceResponse {
+    data: any;
     constructor(data) {
         // The response data from the appliance includes a packet header which we don't want
         this.data = data.slice(0x32);
@@ -163,4 +164,3 @@ class ApplianceResponse {
         return this.data[0x0d] & 0x7f;
     }
 }
-module.exports = ApplianceResponse;

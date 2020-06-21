@@ -1,5 +1,5 @@
-const BaseCommand = require('./BaseCommand.js'); 
-class SetCommand extends BaseCommand {
+import BaseCommand from './BaseCommand';
+export default class SetCommand extends BaseCommand {
     constructor(device_type) {
         super(device_type);
     }
@@ -73,4 +73,3 @@ class SetCommand extends BaseCommand {
         this.data[0x14] = turboModeEnabled ? 0x02 : 0;
     }
 }
-module.exports = SetCommand;

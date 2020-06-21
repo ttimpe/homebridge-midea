@@ -1,5 +1,5 @@
-class Utils {
- static encode(data) {
+export default class Utils {
+ static encode(data) : number[] {
      	const normalized = [];
      	for (let b of data) {
      		b = parseInt(b);
@@ -12,7 +12,7 @@ class Utils {
      }
    
      
-    static decode(data) {
+    static decode(data) : number[] {
      	const normalized = [];
      	for (let b of data) {
      		b = parseInt(b);
@@ -23,10 +23,9 @@ class Utils {
      	}
      	return normalized;
      }
-     static getStamp() {
+     static getStamp() : string {
      	const date = new Date();
      	return date.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
      }
 
 }
-module.exports = Utils;
