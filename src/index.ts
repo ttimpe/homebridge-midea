@@ -28,7 +28,7 @@ class MideaAccessory {
   reauthInterval :any = null
   atoken: string = ''
   sId: string = ''
-  hgIdArray: any
+  hgIdArray: any = []
   dataKey : string = ''
   baseHeader : object
   log: any
@@ -497,7 +497,7 @@ class MideaAccessory {
                 json: true,
                 form: form,
                 jar: this.jar,
-                gzip: true,
+                gzip: true
               },
               (err :any, resp :any, body :any) => {
                 if (err || (resp && resp.statusCode >= 400) || !body) {
