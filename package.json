@@ -2,7 +2,7 @@
   "name": "homebridge-midea",
   "version": "1.0.5",
   "description": "Homebridge plugin for Midea AC units",
-  "main": "index.js",
+  "main": "lib/index.js",
   "engines": {
     "node": ">=12.0.0",
     "homebridge": ">=1.0.0"
@@ -22,6 +22,7 @@
     "air conditioner"
   ],
   "devDependencies": {
+    "@types/node": "^14.0.13",
     "typescript": "^3.9.5"
   },
   "scripts": {

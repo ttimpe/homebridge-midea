@@ -19,7 +19,13 @@
       "name": "Test",
       "interval": 1,
       "user": "test@midea.com",
-      "password": "test password"
+      "password": "test password",
+      "supportedSwingMode": "Vertical",
+      "fanOnlyMode": true,
+      "fanOnlyModeName": "Lüftermodus",
+      "temperatureSteps": 1,
+      "model": "comfee",
+      "id": "12345"
     }
   ]
 }
