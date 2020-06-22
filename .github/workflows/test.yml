@@ -37,12 +37,12 @@ jobs:
       run: |
         cd $GITHUB_WORKSPACE
         npm install
-        npm build
+        npm run build
     - name: Copying test config to right place
       run: |
         mkdir ~/.homebridge
         cp $GITHUB_WORKSPACE/test/config.json ~/.homebridge/config.json
-        sudo cp -R $GITHUB_WORKSPACE/lib /usr/lib/node_modules/homebridge-midea
+        sudo cp -R $GITHUB_WORKSPACE /usr/lib/node_modules/
         chmod +x $GITHUB_WORKSPACE/test/test.sh
     # Run homebridge in screen
     - name: Running homebridge

@@ -1,12 +1,14 @@
-class PacketBuilder {
+import BaseCommand from './BaseCommand';
+export default class PacketBuilder {
+    _command: number[] = []
+    packet: number[] = []
     constructor() {
-        this._command = null;
 
         // Init the packet with the header data. Weird magic numbers, I'm not sure what they all do, but they have to be there (packet length at 0x4)
         this.packet = [90, 90, 1, 16, 92, 0, 32, 0, 1, 0, 0, 0, 189, 179, 57, 14, 12, 5, 20, 20, 29, 129, 0, 0, 0, 16, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
     }
 
-    set command(command) {
+    set command(command: BaseCommand) {
         this._command = command.finalize();
     }
 
@@ -22,8 +24,7 @@ class PacketBuilder {
         return this.packet;
     }
 
-    checksum(data) {
-        return 255 - (data.reduce((a, b) => a + b) % 256) + 1;
+    checksum(data: number[]) {
+        return 255 - (data.reduce((a: number, b : number) => a + b) % 256) + 1;
     }
 }
-module.exports = PacketBuilder;

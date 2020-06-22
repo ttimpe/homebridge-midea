@@ -1,14 +1,17 @@
-const BaseCommand = require('./BaseCommand.js'); 
-class SetCommand extends BaseCommand {
-    constructor(device_type) {
+import BaseCommand from './BaseCommand';
+export default class SetCommand extends BaseCommand {
+    constructor(device_type: number = 0xAC) {
         super(device_type);
     }
 
     get audibleFeedback() {
-        return this.data[0x0b] & 0x42;
+        if (this.data[0x0b] & 0x42) {
+            return true;
+        }
+        return false;
     }
 
-    set audibleFeedback(feedbackEnabled) {
+    set audibleFeedback(feedbackEnabled: boolean) {
         this.data[0x0b] &= ~0x42; // Clear the audible bits
         this.data[0x0b] |= feedbackEnabled ? 0x42 : 0;
     }
@@ -26,7 +29,7 @@ class SetCommand extends BaseCommand {
         return this.data[0x0c] & 0x1f;
     }
 
-    set targetTemperature(temperatureCelsius) {
+    set targetTemperature(temperatureCelsius: number) {
         this.data[0x0c] &= ~0x1f; // Clear the temperature bits
         this.data[0x0c] |= (temperatureCelsius & 0xf) | ((temperatureCelsius << 4) & 0x10);
     }
@@ -35,7 +38,7 @@ class SetCommand extends BaseCommand {
         return (this.data[0x0c] & 0xe0) >> 5;
     }
 
-    set operationalMode(mode) {
+    set operationalMode(mode : number) {
         this.data[0x0c] &= ~0xe0; // Clear the mode bit
         this.data[0x0c] |= (mode << 5) & 0xe0;
     }
@@ -44,7 +47,7 @@ class SetCommand extends BaseCommand {
         return this.data[0x0d];
     }
 
-    set fanSpeed(speed) {
+    set fanSpeed(speed: number) {
         this.data[0x0d] = speed;
     }
 
@@ -52,7 +55,7 @@ class SetCommand extends BaseCommand {
         return this.data[0x13] > 0;
     }
 
-    set ecoMode(ecoModeEnabled) {
+    set ecoMode(ecoModeEnabled: boolean) {
         this.data[0x13] = ecoModeEnabled ? 0xff : 0;
     }
 
@@ -69,8 +72,7 @@ class SetCommand extends BaseCommand {
         return this.data[0x14] > 0;
     }
 
-    set turboMode(turboModeEnabled) {
+    set turboMode(turboModeEnabled: boolean) {
         this.data[0x14] = turboModeEnabled ? 0x02 : 0;
     }
 }
-module.exports = SetCommand;
