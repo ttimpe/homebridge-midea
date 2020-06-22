@@ -47,49 +47,94 @@ class MideaAccessory {
 		this.config = config;
 		this.enabledServices = [];
 
-
+		this.name = config.model || this.name;
+		this.id = config.id || this.id;
 		this.targetTemperature = 0;
 		this.indoorTemperature = 0;
 		this.powerState = 0;
 		this.operationalMode = 0;
+		this.swingMode = 0;
+		this.fanSpeed = 0;
+		this.fanOnlyMode = config.fanOnlyMode || false;
+		this.fanOnlyModeName = config.fanOnlyModeName || 'Fan Only Mode';
+		this.temperatureSteps = config.temperatureSteps || 0.5;
+
+		this.supportedSwingMode = '';
+		// values from device are 0.0="Off",12.0="Vertical",3.0="Horizontal",15.0="Both"
+		switch (config.supportedSwingMode) {
+			case 'Vertical':
+				this.supportedSwingMode = 12;
+				break;
+			case 'Horizontal':
+				this.supportedSwingMode = 3;
+				break;
+			case 'Both':
+				this.supportedSwingMode = 15;
+				break;
+			default:
+				this.supportedSwingMode = 0;
+				break;
+		}
 
 		this.informationService = new Service.AccessoryInformation();
 		this.informationService
 		.setCharacteristic(Characteristic.Manufacturer, 'midea')
+		.setCharacteristic(Characteristic.FirmwareRevision, '0.0.1')
 		.setCharacteristic(Characteristic.Model, this.name)
-		.setCharacteristic(Characteristic.SerialNumber, this.id)
-		.setCharacteristic(Characteristic.FirmwareRevision, '0.0.1');
+		.setCharacteristic(Characteristic.SerialNumber, this.id);
+
+		
 
 		this.service = new Service.HeaterCooler();
+		this.fanService = new Service.Fanv2();
+		this.fanService.setCharacteristic(Characteristic.Name, this.fanOnlyModeName);
 
+	  // create handlers for required characteristics
+	  this.service.getCharacteristic(Characteristic.Active)
+      .on('get', this.handleActiveGet.bind(this))
+      .on('set', this.handleActiveSet.bind(this));
 
-
-
-		this.thermostatService = new Service.Thermostat();
-
-      // create handlers for required characteristics
-      this.thermostatService.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
+      this.service.getCharacteristic(Characteristic.CurrentHeatingCoolingState)
       .on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.TargetHeatingCoolingState)
+	  this.service.getCharacteristic(Characteristic.TargetHeatingCoolingState)
       .on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
-      .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
+	  .on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.CurrentTemperature)
+      this.service.getCharacteristic(Characteristic.CurrentTemperature)
       .on('get', this.handleCurrentTemperatureGet.bind(this));
 
-      this.thermostatService.getCharacteristic(Characteristic.TargetTemperature)
-      .on('get', this.handleTargetTemperatureGet.bind(this))
-      .on('set', this.handleTargetTemperatureSet.bind(this));
+      this.service.getCharacteristic(Characteristic.CoolingThresholdTemperature)
+      .on('get', this.handleCoolingThresholdTemperatureGet.bind(this))
+	  .on('set', this.handleCoolingThresholdTemperatureSet.bind(this))
+	  .setProps({
+		minStep: this.temperatureSteps
+	  });
 
-      this.thermostatService.getCharacteristic(Characteristic.TemperatureDisplayUnits)
+      this.service.getCharacteristic(Characteristic.TemperatureDisplayUnits)
       .on('get', this.handleTemperatureDisplayUnitsGet.bind(this))
       .on('set', this.handleTemperatureDisplayUnitsSet.bind(this));
 
+      this.service.getCharacteristic(Characteristic.SwingMode)
+      .on('get', this.handleSwingModeGet.bind(this))
+      .on('set', this.handleSwingModeSet.bind(this));
 
+      this.service.getCharacteristic(Characteristic.RotationSpeed)
+      .on('get', this.handleRotationSpeedGet.bind(this))
+      .on('set', this.handleRotationSpeedSet.bind(this));
+
+	  // for fan only mode
+      this.fanService.getCharacteristic(Characteristic.Active)
+      .on('get', this.handleFanActiveGet.bind(this))
+	  .on('set', this.handleFanActiveSet.bind(this));
 
       this.enabledServices.push(this.informationService);
-      this.enabledServices.push(this.thermostatService);
+	  this.enabledServices.push(this.service);
+
+	  
+	  if (config.fanOnlyMode) {
+		this.enabledServices.push(this.fanService);
+	}
 
       this.onReady();
 
@@ -195,8 +240,8 @@ class MideaAccessory {
   /**
    * Handle requests to get the current value of the "Target Temperature" characteristic
    */
-   handleTargetTemperatureGet(callback) {
-   	this.log('Triggered GET TargetTemperature');
+  	handleCoolingThresholdTemperatureGet(callback) {
+   	this.log('Triggered GET handleCoolingThresholdTemperature');
 
     // set this to a valid value for TargetTemperature
     const currentValue = this.targetTemperature;
@@ -207,8 +252,8 @@ class MideaAccessory {
   /**
    * Handle requests to set the "Target Temperature" characteristic
    */
-   handleTargetTemperatureSet(value, callback) {
-   	this.log('Triggered SET TargetTemperature:', value);
+  	handleCoolingThresholdTemperatureSet(value, callback) {
+   	this.log('Triggered SET handleCoolingThresholdTemperature:', value);
    	if (this.targetTemperature != value) {
    		this.targetTemperature = value;
    		this.sendUpdateToDevice();
@@ -237,6 +282,154 @@ class MideaAccessory {
    	callback(null);
    }
 
+   /**
+   * Handle requests to get the current value of the "swingMode" characteristic
+   */
+	handleSwingModeGet(callback) {
+		this.log('Triggered GET swingMode');
+
+	// set this to a valid value for swingMode
+	// values from device are 0.0="Off",12.0="Vertical",3.0="Horizontal",15.0="Both"
+
+	let currentValue = Characteristic.SwingMode.disabled
+		if (this.swingMode != 0 ){
+			currentValue = Characteristic.SwingMode.enabled
+		}
+
+	callback(null, currentValue);
+	}
+
+	/**
+	* Handle requests to set the "swingMode" characteristic
+	*/
+	handleSwingModeSet(value, callback) {
+		this.log('Triggered SET swingMode:', value);
+
+		// convert this.swingMode to a 0/1
+		var currentSwingMode = this.swingMode!=0?1:0
+
+		if (currentSwingMode != value) {
+			if(value == 0){
+				this.swingMode = 0;
+			}
+			else {
+				this.swingMode = this.supportedSwingMode;
+			}
+
+			this.sendUpdateToDevice();
+		}
+		callback(null, value);
+	}
+   
+
+   /**
+   * Handle requests to get the current value of the "RotationSpeed" characteristic
+   */
+	handleRotationSpeedGet(callback) {
+		this.log('Triggered GET RotationSpeed');
+
+	// set this to a valid value for RotationSpeed
+	// values from device are 20.0="Silent",40.0="Low",60.0="Medium",80.0="High",102.0="Auto"
+	// convert to good usable slider in homekit in percent
+
+	let currentValue = 0;
+	if (this.fanSpeed == 40) {
+		currentValue = 25;
+	}
+	else if (this.fanSpeed == 60){
+		currentValue = 50;
+	}
+	else if (this.fanSpeed == 80){
+		currentValue = 75;
+	}
+	else {
+		currentValue = 100;
+	}
+	callback(null, currentValue);
+	}
+
+	/**
+	* Handle requests to set the "RotationSpeed" characteristic
+	*/
+	handleRotationSpeedSet(value, callback) {
+		this.log('Triggered SET RotationSpeed:', value);
+
+		if (this.fanSpeed != value) {
+			// transform values in percent
+			// values from device are 20.0="Silent",40.0="Low",60.0="Medium",80.0="High",102.0="Auto"
+			// Silent are not now available in devices?
+			if (value <= 25) {
+				value = 40;
+			}
+			else if (value <= 50){
+				value = 60;
+			}
+			else if (value <= 75){
+				value = 80;
+			}
+			else {
+				value = 102;
+			}
+
+			this.fanSpeed = value;
+			this.sendUpdateToDevice();
+		}
+		callback(null, value);
+	}
+
+	/**
+	 * Handle requests to get the current value of the "On" characteristic
+	 */
+	handleFanActiveGet(callback) {
+		this.log('Triggered GET Fan');
+		
+		// workaround to get the "fan only mode" from device
+		// device operation values are 1.0="Auto",2.0="Cool",3.0="Dry",4.0="Heat",5.0="Fan"
+
+		// set this to a valid value for Active
+		if (this.operationalMode == 5) {
+			callback(null, Characteristic.Active.ACTIVE);
+		} else {
+			callback(null, Characteristic.Active.INACTIVE);
+		}
+	
+	}
+
+	/**
+	* Handle requests to set the "On" characteristic
+	*/
+	handleFanActiveSet(value, callback) {
+		this.log('Triggered SET Fan:', value);
+		
+		// workaround to get the "fan only mode" from device
+		// device operation values are 1.0="Auto",2.0="Cool",3.0="Dry",4.0="Heat",5.0="Fan"
+		if (value == Characteristic.Active.ACTIVE) {
+			this.operationalMode = 5;	
+		}
+
+		else {
+			//if (Characteristic.CurrentHeatingCoolingState.COOL){
+			//	this.operationalMode = 2;
+			//}
+			//else if (Characteristic.CurrentHeatingCoolingState.AUTO){
+				////normaly to 1, but we only want to cool
+				//this.operationalMode = 1;
+			//	this.operationalMode = 2;
+			//}
+			//else if (Characteristic.CurrentHeatingCoolingState.HEAT){
+				////normaly to 4, but we only want to cool
+				//this.operationalMode = 4;
+			//	this.operationalMode = 2;
+			//}
+			// set default to mode "2" if it is off
+			//else {
+				this.operationalMode = 2;
+			//}
+		}
+
+		this.sendUpdateToDevice();
+		callback(null, value);
+	}
 
 
      async onReady() {
@@ -400,10 +593,16 @@ class MideaAccessory {
      				if (body.result && body.result.list && body.result.list.length > 0) {
      					this.log('getUserList result is', body.result);
      					body.result.list.forEach(async (currentElement) => {
-     						this.hgIdArray.push(currentElement.id);
+							 this.hgIdArray.push(currentElement.id);
+							 
+							// write device information to informationService
+							// not shown in homekit info - dont know why
+							this.informationService
+							.setCharacteristic(Characteristic.Model, currentElement.name)
+							.setCharacteristic(Characteristic.SerialNumber, currentElement.id);
+							//this.log("--------", this.informationService.getCharacteristic(Characteristic.SerialNumber).value);
 
-
-     					});
+						 });
      				}
      				resolve();
      			} catch (error) {
@@ -482,14 +681,18 @@ class MideaAccessory {
             		this.log('target temperature', response.targetTemperature);
 
             		this.targetTemperature = response.targetTemperature;
-            		this.indoorTemperature = response.indoorTemperature;
-            		this.powerState = response.powerState;
+					this.indoorTemperature = response.indoorTemperature;
+					this.fanSpeed = response.fanSpeed;
+					this.powerState = response.powerState;
+					this.swingMode = response.swingMode;
+					this.operationalMode = response.operationalMode;
+            		this.log('fanSpeed is set to', response.fanSpeed);
+            		this.log('swingMode is set to', response.swingMode);
             		this.log('powerState is set to', response.powerState);
-            		this.log('operational mode is set to', response.operationalMode);
+					this.log('operational mode is set to', response.operationalMode);
 
-
-            		this.operationalMode = response.operationalMode;
-
+					
+					
             		properties.forEach((element) => {
             			let value = response[element];
 
@@ -645,7 +848,11 @@ class MideaAccessory {
      sendUpdateToDevice() {
      	const command = new SetCommand();
      	command.powerState = this.powerState;
-     	command.targetTemperature = this.targetTemperature;
+		command.targetTemperature = this.targetTemperature;
+		command.swingMode = this.swingMode;
+		command.fanSpeed = this.fanSpeed;
+		command.operationalMode = this.operationalMode
+		//operational mode for workaround with fan only mode on device
      	const pktBuilder = new PacketBuilder();
      	pktBuilder.command = command;
      	const data = pktBuilder.finalize();
@@ -664,7 +871,9 @@ class MideaAccessory {
      		.catch(() => {
      			this.log("Login failed");
      		});
-     	});
+		 });
+		 //after sending, update because sometimes the api hangs
+		 this.updateValues();
      }
 
 
