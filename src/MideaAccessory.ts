@@ -10,7 +10,7 @@ export class MideaAccessory {
 	fanOnlyMode : boolean = false
 	fanOnlyModeName : string = ''
 	temperatureSteps: number = 1
-	powerState : number = 0
+	powerState : any
 	supportedSwingMode : number = 0
 	operationalMode : number = 0
 	swingMode :number = 0
@@ -83,7 +83,7 @@ export class MideaAccessory {
    	this.platform.log.debug('Triggered GET Active, returning', this.powerState);
 
    	// set this to a valid value for Active
-   	if (this.powerState) {
+   	if (this.powerState == 1) {
    		callback(null, this.platform.Characteristic.Active.ACTIVE);
    	} else {
    		callback(null, this.platform.Characteristic.Active.INACTIVE);
