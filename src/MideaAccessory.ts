@@ -23,8 +23,8 @@ export class MideaAccessory {
 		private readonly platform: MideaPlatform,
 		private readonly accessory: PlatformAccessory
 		) {
-		this.deviceId = this.accessory.context.device.id
-		this.deviceType = this.accessory.context.device.type
+		this.deviceId = this.accessory.context.deviceId
+		this.deviceType = this.accessory.context.deviceType
 		this.name = this.accessory.context.name
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
 
