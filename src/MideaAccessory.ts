@@ -25,6 +25,8 @@ export class MideaAccessory {
 		) {
 		this.deviceId = this.accessory.context.device.id
 		this.deviceType = this.accessory.context.device.type
+		this.name = this.accessory.context.name
+		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
 
 		this.accessory.getService(this.platform.Service.AccessoryInformation)!
 		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
