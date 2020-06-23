@@ -1,7 +1,3 @@
 node_modules/
-<<<<<<< HEAD
 .DS_Store
-lib/
-=======
-.DS_Store
->>>>>>> typescript
+
