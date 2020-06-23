@@ -3,6 +3,7 @@ import { MideaPlatform } from './MideaPlatform'
 
 export class MideaAccessory {
 	deviceId: string = ''
+	deviceType :number = 0xAC
 	targetTemperature : number = 0
 	indoorTemperature: number = 0
 	fanSpeed: number = 0
@@ -22,11 +23,14 @@ export class MideaAccessory {
 		private readonly platform: MideaPlatform,
 		private readonly accessory: PlatformAccessory
 		) {
+		this.deviceId = this.accessory.context.device.id
+		this.deviceType = this.accessory.context.device.type
+
 		this.accessory.getService(this.platform.Service.AccessoryInformation)!
 		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
 		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, '0.0.1')
 		.setCharacteristic(this.platform.Characteristic.Model, 'AC')
-		.setCharacteristic(this.platform.Characteristic.SerialNumber, 'SERIAL');
+		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.device.id.toString());
 
 		this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler)
 		this.service.setCharacteristic(this.platform.Characteristic.Name, this.name)
