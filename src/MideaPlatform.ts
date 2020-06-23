@@ -30,7 +30,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		reauthInterval :any = null
 		atoken: string = ''
 		sId: string = ''
-		hgIdArray: any = []
 		dataKey : string = ''
 		baseHeader : object
 
@@ -607,7 +606,9 @@ updateValues() {
 
 	const data = header.concat(Constants.UpdateCommand);
 
+
 	this.accessories.forEach((accessory: PlatformAccessory) => {
+		this.log.debug('update accessory',accessory.context.device)
 		this.sendCommand(accessory.context.device, data)
 		.then(() => {
 			this.log.debug("Update successful");
