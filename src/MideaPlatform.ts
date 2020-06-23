@@ -433,12 +433,10 @@ getUserList() {
 
 						if (existingAccessory) {
 							this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-							new MideaAccessory(this, existingAccessory)
 						} else {
 							this.log.debug('Adding new device:', currentElement.name)
 							const accessory = new this.api.platformAccessory(currentElement.name, uuid)
-							accessory.context.device = currentElement
-							new MideaAccessory(this, accessory)
+							accessory.context.device = new MideaAccessory(this, accessory)
 							this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 						}
 
@@ -454,7 +452,7 @@ getUserList() {
 		);
 	});
 }
-sendCommand(device : MideaAccessory, order: any) {
+sendCommand(device: MideaAccessory, order: any) {
 	return new Promise((resolve, reject) => {
 		const orderEncode = Utils.encode(order);
 		const orderEncrypt = this.encryptAes(orderEncode);
@@ -608,8 +606,8 @@ updateValues() {
 
 
 	this.accessories.forEach((accessory: PlatformAccessory) => {
-		this.log.debug('update accessory',accessory.context.device)
-		this.sendCommand(accessory.context.device, data)
+		this.log.debug('update accessory',accessory.context.device.id)
+		this.sendCommand(accessory.context.device.id, data)
 		.then(() => {
 			this.log.debug("Update successful");
 		})
