@@ -606,8 +606,8 @@ updateValues() {
 
 
 	this.accessories.forEach((accessory: PlatformAccessory) => {
-		this.log.debug('update accessory',accessory.context.device.id)
-		this.sendCommand(accessory.context.device.id, data)
+		this.log.debug('update accessory',accessory.context.device.deviceId)
+		this.sendCommand(accessory.context.device.deviceId, data)
 		.then(() => {
 			this.log.debug("Update successful");
 		})
