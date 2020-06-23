@@ -433,10 +433,13 @@ getUserList() {
 
 						if (existingAccessory) {
 							this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-							if (existingAccessory.context.hasOwnProperty('device') && existingAccessory.context.device.hasOwnProperty('id')) {
+							if (!(existingAccessory.context.hasOwnProperty('deviceType'))) {
 								this.log.debug('Device ' + existingAccessory.displayName + ' has no context, recreating');
 								this.api.unregisterPlatformAccessories('homebridge-midea', 'midea', [existingAccessory])
 								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
+								accessory.context.deviceId = currentElement.deviceId;
+								accessory.context.name = currentElement.name;
+								accessory.context.deviceType = currentElement.type;
 								accessory.context.device = new MideaAccessory(this, accessory)
 								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 
@@ -444,6 +447,9 @@ getUserList() {
 						} else {
 							this.log.debug('Adding new device:', currentElement.name)
 							const accessory = new this.api.platformAccessory(currentElement.name, uuid)
+							accessory.context.deviceId = currentElement.id
+							accessory.context.name = currentElement.name
+							accessory.context.deviceType = currentElement.type
 							accessory.context.device = new MideaAccessory(this, accessory)
 							this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 						}
