@@ -433,7 +433,7 @@ getUserList() {
 
 						if (existingAccessory) {
 							this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-							if (existingAccessory.context.device.hasOwnProperty('id')) {
+							if (existingAccessory.context.hasOwnProperty('device') && existingAccessory.context.device.hasOwnProperty('id')) {
 								this.log.debug('Device ' + existingAccessory.displayName + ' has no context, recreating');
 								this.api.unregisterPlatformAccessories('homebridge-midea', 'midea', [existingAccessory])
 								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
