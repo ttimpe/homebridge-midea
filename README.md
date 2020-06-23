@@ -8,7 +8,7 @@ Homebridge plugin to control Midea AC units. Still in early development.
 Add this to the accessories array in your config.json:
 
 	{
-	    "accessory": "midea",
+	    "platform": "midea",
 	    "user": "MIDEA_ACCOUNT_EMAIL",
 	    "password": "MIDEA_PASSWORD",
 	    "name": "NAME",
