@@ -324,6 +324,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					device.powerState = response.powerState ? 1 : 0
 					device.swingMode = response.swingMode;
 					device.operationalMode = response.operationalMode;
+					device.humidty = response.humidity
 					this.log.debug('fanSpeed is set to', response.fanSpeed);
 					this.log.debug('swingMode is set to', response.swingMode);
 					this.log.debug('powerState is set to', response.powerState);
@@ -492,6 +493,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					device.powerState = response.powerState ? 1 : 0
 					device.swingMode = response.swingMode;
 					device.operationalMode = response.operationalMode;
+					device.humidty = response.humidity
 					this.log.debug('fanSpeed is set to', response.fanSpeed);
 					this.log.debug('swingMode is set to', response.swingMode);
 					this.log.debug('powerState is set to', response.powerState);

@@ -15,6 +15,7 @@ export class MideaAccessory {
 	operationalMode : number = 0
 	swingMode :number = 0
 	name: string = ''
+	humidty: number = 0
 
 
 	service: Service
@@ -58,6 +59,18 @@ export class MideaAccessory {
 
 		switch (this.deviceType) {
 			case 0x00: {
+				this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
+				.on('get', this.handleCurrentRelativeHumidityGet.bind(this));
+
+
+				this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
+				.on('get', this.handleCurrentHumidifierDehumidifierStateGet.bind(this))
+
+				this.service.getCharacteristic(this.platform.Characteristic.TargetHumidifierDehumidifierState)
+				.on('get', this.handleTargetHumidifierDehumidifierStateGet.bind(this))
+				.on('set', this.handleTargetHumidifierDehumidifierStateSet.bind(this))
+
+
 
 			}
 			break
@@ -370,4 +383,28 @@ export class MideaAccessory {
 		this.platform.sendUpdateToDevice(this);
 		callback(null, value);
 	}
+
+
+	// HumidifierDehumidifier
+
+	handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
+		callback(null, this.humidty)
+	}
+
+	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
+		callback(null, 1)
+	}
+	handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
+		this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
+		callback(null, value)
+	}
+
+	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
+		callback(null, 1)
+	}
+
+
 }
