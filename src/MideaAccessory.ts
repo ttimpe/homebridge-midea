@@ -9,7 +9,7 @@ export class MideaAccessory {
 	fanSpeed: number = 0
 	fanOnlyMode : boolean = false
 	fanOnlyModeName : string = ''
-	temperatureSteps: number = 1
+	temperatureSteps: number = 0.5
 	powerState : any
 	supportedSwingMode : number = 0
 	operationalMode : number = 0
@@ -20,6 +20,7 @@ export class MideaAccessory {
 
 	service: Service
 
+
 	constructor(
 		private readonly platform: MideaPlatform,
 		private readonly accessory: PlatformAccessory
@@ -27,6 +28,32 @@ export class MideaAccessory {
 		this.deviceId = this.accessory.context.deviceId
 		this.deviceType = this.accessory.context.deviceType
 		this.name = this.accessory.context.name
+
+		// Check for device specific overrides
+		if (platform.config.devices && platform.config.devices[this.deviceId]) {
+			if (platform.config.devices[this.deviceId].hasOwnProperty('supportedSwingMode')) {
+				switch (platform.config.devices[this.deviceId].supportedSwingMode) {
+					case 'Vertical':
+					this.supportedSwingMode = 12;
+					break;
+					case 'Horizontal':
+					this.supportedSwingMode = 3;
+					break;
+					case 'Both':
+					this.supportedSwingMode = 15;
+					break;
+					default:
+					this.supportedSwingMode = 0;
+					break;
+				}
+			}
+			if (platform.config.devices[this.deviceId].hasOwnProperty('temperatureSteps')) {
+				this.temperatureSteps = platform.config.devices[this.deviceId].temperatureSteps;
+			}
+
+		}
+
+
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
 
 		this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -44,7 +71,6 @@ export class MideaAccessory {
 			break
 			default: {
 				this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler)
-
 			}
 			break;
 
@@ -95,6 +121,17 @@ export class MideaAccessory {
 				this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
 				.on('get', this.handleTemperatureDisplayUnitsGet.bind(this))
 				.on('set', this.handleTemperatureDisplayUnitsSet.bind(this));
+
+
+
+				this.service.getCharacteristic(this.platform.Characteristic.SwingMode)
+				.on('get', this.handleSwingModeGet.bind(this))
+				.on('set', this.handleSwingModeSet.bind(this));
+
+				this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+				.on('get', this.handleRotationSpeedGet.bind(this))
+				.on('set', this.handleRotationSpeedSet.bind(this));
+
 			}
 			break
 		}
@@ -267,7 +304,7 @@ export class MideaAccessory {
    // 	/**
    // 	* Handle requests to set the "swingMode" characteristic
    // 	*/
-   handleSwingModeSet(value: number, callback: Function) {
+   handleSwingModeSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET swingMode:', value);
 
    	// convert this.swingMode to a 0/1
@@ -311,7 +348,7 @@ export class MideaAccessory {
 	/**
 	* Handle requests to set the "RotationSpeed" characteristic
 	*/
-	handleRotationSpeedSet(value: number, callback: Function) {
+	handleRotationSpeedSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 		this.platform.log.debug('Triggered SET RotationSpeed:', value);
 		if (this.fanSpeed != value) {
 			// transform values in percent
@@ -379,32 +416,32 @@ export class MideaAccessory {
 						//			else {
 							//				this.operationalMode = 2;
 							//			}
-		}
-		this.platform.sendUpdateToDevice(this);
-		callback(null, value);
-	}
+						}
+						this.platform.sendUpdateToDevice(this);
+						callback(null, value);
+					}
 
 
-	// HumidifierDehumidifier
+					// HumidifierDehumidifier
 
-	handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
-		callback(null, this.humidty)
-	}
+					handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
+						this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
+						callback(null, this.humidty)
+					}
 
-	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
-		callback(null, 1)
-	}
-	handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
-		this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
-		callback(null, value)
-	}
+					handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+						this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
+						callback(null, 1)
+					}
+					handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
+						this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
+						callback(null, value)
+					}
 
-	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
-		callback(null, 1)
-	}
+					handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+						this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
+						callback(null, 1)
+					}
 
 
-}
+				}

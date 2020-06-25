@@ -5,45 +5,36 @@ Homebridge plugin to control Midea AC units. Still in early development.
 
 ## Configuration
 
-Add this to the accessories array in your config.json:
+Add this to the platforms array in your config.json:
 
 	{
 	    "platform": "midea",
 	    "user": "MIDEA_ACCOUNT_EMAIL",
 	    "password": "MIDEA_PASSWORD",
-	    "name": "NAME",
 	    "interval": 1,
-        "supportedSwingMode": "Vertical",
-        "fanOnlyMode": true,
-        "fanOnlyModeName": "Lüftermodus",
-        "temperatureSteps": 1,
-        "model": "comfee",
-        "id": "12345"
+	    "devices": {
+	    	"ID_OF_DEVICE": {
+	    		"supportedSwingMode": "Vertical",
+				"temperatureSteps": 1
+	    	}
+	    }
 	}
 
-## Optional Configuration Values
+## Optional per-device Configuration Values
+
+To set specific per-device values, be sure to first look into the Home app to find your deviceId and use it as the key in the ```devices``` object
 
 ### supportedSwingMode
 
 "Off", "Vertical", "Horizontal", "Both"
 You have to select which type your device supports
 
-### fanOnlyMode
-
-If your device support "Fan only mode" you can set it to "true", default is "false".
-Because homekit does not support this, we did a workaround. A additional fan device is available you can activate.
-
-### fanOnlyModeName
-
-Name of the Homekit Device for the Fan only mode. Default name is "Fan only mode".
 
 ### temperatureSteps
 
 Temperature steps that the device supports. Default is 0.5
 
-### model & id
 
-Information that you can find in the homekit accessory
 
 ## Usage
 
@@ -58,7 +49,7 @@ Rotation Speed values are:
 
 ## Notes
 
-As of now, this plugin just uses the first device in your account and doesn't care about anything else. The goal is to make this into a platform plugin to allow all of your Midea devices to be shown in HomeKit but this requires more knowledge of other device types.
+This version of ```homebridge-midea```is a platform and should be able to access all device in the user's account. However, many devices may not be supported or function incorrectly. This is due to the lack of documentation of the raw MSmart API. If you encounter any problems, please open a new issue and specify your device model.
 
 
 ## Credits

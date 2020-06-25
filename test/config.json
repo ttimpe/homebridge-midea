@@ -13,19 +13,18 @@
     "start": 52100,
     "end": 52150
   },
-  "accessories": [
+  "platforms": [
   	{
-      "accessory": "midea",
-      "name": "Test",
+      "platform": "midea",
       "interval": 1,
       "user": "test@midea.com",
       "password": "test password",
-      "supportedSwingMode": "Vertical",
-      "fanOnlyMode": true,
-      "fanOnlyModeName": "Lüftermodus",
-      "temperatureSteps": 1,
-      "model": "comfee",
-      "id": "12345"
+      "devices": {
+        "ID_OF_DEVICE": {
+          "supportedSwingMode": "Vertical",
+          "temperatureSteps": 1
+        }
+      }
     }
   ]
 }
