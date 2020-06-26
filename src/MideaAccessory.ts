@@ -26,11 +26,14 @@ export class MideaAccessory {
 
 	constructor(
 		private readonly platform: MideaPlatform,
-		private readonly accessory: PlatformAccessory
+		private readonly accessory: PlatformAccessory,
+		deviceId: string,
+		deviceType: MideaDeviceType,
+		name : string
 		) {
-		this.deviceId = this.accessory.context.deviceId
-		this.deviceType = this.accessory.context.deviceType
-		this.name = this.accessory.context.name
+		this.deviceId = deviceId
+		this.deviceType = deviceType
+		this.name = name
 
 		// Check for device specific overrides
 		if (platform.config.devices && platform.config.devices[this.deviceId]) {
@@ -63,7 +66,7 @@ export class MideaAccessory {
 		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
 		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, '0.0.1')
 		.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
-		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId);
 
 
 		switch (this.deviceType) {

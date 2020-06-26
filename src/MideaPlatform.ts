@@ -48,9 +48,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		this.baseHeader = { 'User-Agent': Constants.UserAgent }
 		this.log = log;
 		this.config = config;
-
-
-		this.onReady();
+    	api.on('didFinishLaunching', () => {
+			this.onReady();
+		})
 	}
 
 
@@ -226,8 +226,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 									accessory.context.deviceId = currentElement.deviceId;
 									accessory.context.name = currentElement.name;
 									accessory.context.deviceType = currentElement.type;
-									this.mideaAccessories.push(new MideaAccessory(this, accessory))
-									this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+									var ma = new MideaAccessory(this, accessory, currentElement.deviceId, currentElement.deviceType, currentElement.name)
 									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 							} else {
 								this.log.debug('Adding new device:', currentElement.name)
@@ -235,10 +234,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								accessory.context.deviceId = currentElement.id
 								accessory.context.name = currentElement.name
 								accessory.context.deviceType = currentElement.type
-								this.mideaAccessories.push(new MideaAccessory(this, accessory))
-								this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+								var ma = new MideaAccessory(this, accessory, currentElement.deviceId, currentElement.deviceType, currentElement.name)
+								this.mideaAccessories.push(ma)
 								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 							}
+							this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+
 
 						});
 					}
