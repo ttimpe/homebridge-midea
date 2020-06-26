@@ -219,15 +219,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 							if (existingAccessory) {
 								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-								
-									this.log.debug('Device ' + existingAccessory.displayName + ' has no context, recreating');
-									this.api.unregisterPlatformAccessories('homebridge-midea', 'midea', [existingAccessory])
-									const accessory = new this.api.platformAccessory(currentElement.name, uuid)
-									accessory.context.deviceId = currentElement.deviceId;
-									accessory.context.name = currentElement.name;
-									accessory.context.deviceType = currentElement.type;
-									var ma = new MideaAccessory(this, accessory, currentElement.id, currentElement.type, currentElement.name)
-									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+								existingAccessory.context.deviceId = currentElement.id
+								existingAccessory.context.deviceType = currentElement.type
+								existingAccessory.context.name = currentElement.name
+								this.api.updatePlatformAccessories([existingAccessory])
+								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, currentElement.type, currentElement.name)
+								this.mideaAccessories.push(ma)
 							} else {
 								this.log.debug('Adding new device:', currentElement.name)
 								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
@@ -235,8 +232,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								accessory.context.name = currentElement.name
 								accessory.context.deviceType = currentElement.type
 								var ma = new MideaAccessory(this, accessory, currentElement.id, currentElement.type, currentElement.name)
-								this.mideaAccessories.push(ma)
 								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+
+								this.mideaAccessories.push(ma)
 							}
 							this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 
