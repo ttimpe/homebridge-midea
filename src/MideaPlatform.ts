@@ -228,6 +228,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 									accessory.context.name = currentElement.name;
 									accessory.context.deviceType = currentElement.type;
 									this.mideaAccessories.push(new MideaAccessory(this, accessory))
+									this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 
 								}
@@ -238,6 +239,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								accessory.context.name = currentElement.name
 								accessory.context.deviceType = currentElement.type
 								this.mideaAccessories.push(new MideaAccessory(this, accessory))
+								this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 							}
 
@@ -415,7 +417,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		this.accessories.forEach((accessory: PlatformAccessory) => {
 			this.log.debug('update accessory',accessory.context.deviceId)
 			this.log.debug('current ma are ', this.mideaAccessories)
-			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId === accessory.context.deviceId)
+			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory) {
 				this.sendCommand(mideaAccessory, data)
 				.then(() => {
