@@ -2,6 +2,9 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 import { MideaPlatform } from './MideaPlatform'
 
 export class MideaAccessory {
+
+	
+
 	deviceId: string = ''
 	deviceType :number = 0xAC
 	targetTemperature : number = 0
