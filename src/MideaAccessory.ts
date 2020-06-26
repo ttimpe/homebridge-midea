@@ -1,55 +1,56 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 import { MideaPlatform } from './MideaPlatform'
 import { MideaDeviceType } from './MideaDeviceType'
+import { MideaSwingMode } from './MideaSwingMode'
 export class MideaAccessory {
 
 	
 
-	deviceId: string = ''
-	deviceType :MideaDeviceType = MideaDeviceType.AirConditioner
-	targetTemperature : number = 0
-	indoorTemperature: number = 0
-	fanSpeed: number = 0
-	fanOnlyMode : boolean = false
-	fanOnlyModeName : string = ''
-	temperatureSteps: number = 0.5
-	powerState : any
-	supportedSwingMode : number = 0
-	operationalMode : number = 0
-	swingMode :number = 0
-	name: string = ''
-	humidty: number = 0
+	public deviceId: string = ''
+	public deviceType :MideaDeviceType = MideaDeviceType.AirConditioner
+	public targetTemperature : number = 0
+	public indoorTemperature: number = 0
+	public fanSpeed: number = 0
+	public fanOnlyMode : boolean = false
+	public fanOnlyModeName : string = ''
+	public temperatureSteps: number = 0.5
+	public powerState : any
+	public supportedSwingMode : MideaSwingMode = MideaSwingMode.None
+	public operationalMode : number = 0
+	public swingMode :number = 0
+	public name: string = ''
+	public humidty: number = 0
 
 
-	service: Service
+	private service: Service
 
 
 	constructor(
 		private readonly platform: MideaPlatform,
 		private readonly accessory: PlatformAccessory,
-		deviceId: string,
-		deviceType: MideaDeviceType,
-		name : string
+		private _deviceId: string,
+		private _deviceType: MideaDeviceType,
+		private _name : string
 		) {
-		this.deviceId = deviceId
-		this.deviceType = deviceType
-		this.name = name
+		this.deviceId = _deviceId
+		this.deviceType = _deviceType
+		this.name = _name
 
 		// Check for device specific overrides
 		if (platform.config.devices && platform.config.devices[this.deviceId]) {
 			if (platform.config.devices[this.deviceId].hasOwnProperty('supportedSwingMode')) {
 				switch (platform.config.devices[this.deviceId].supportedSwingMode) {
 					case 'Vertical':
-					this.supportedSwingMode = 12;
+					this.supportedSwingMode = MideaSwingMode.Vertical;
 					break;
 					case 'Horizontal':
-					this.supportedSwingMode = 3;
+					this.supportedSwingMode = MideaSwingMode.Horizontal;
 					break;
 					case 'Both':
-					this.supportedSwingMode = 15;
+					this.supportedSwingMode = MideaSwingMode.Both;
 					break;
 					default:
-					this.supportedSwingMode = 0;
+					this.supportedSwingMode = MideaSwingMode.None;
 					break;
 				}
 			}
