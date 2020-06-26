@@ -1,6 +1,7 @@
 import BaseCommand from './BaseCommand';
+import { MideaDeviceType } from './MideaDeviceType'
 export default class SetCommand extends BaseCommand {
-    constructor(device_type: number = 0xAC) {
+    constructor(device_type: MideaDeviceType = MideaDeviceType.AirConditioner) {
         super(device_type);
     }
 

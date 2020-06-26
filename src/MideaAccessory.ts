@@ -1,12 +1,12 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 import { MideaPlatform } from './MideaPlatform'
-
+import { MideaDeviceType } from './MideaDeviceType'
 export class MideaAccessory {
 
 	
 
 	deviceId: string = ''
-	deviceType :number = 0xAC
+	deviceType :MideaDeviceType = MideaDeviceType.AirConditioner
 	targetTemperature : number = 0
 	indoorTemperature: number = 0
 	fanSpeed: number = 0
@@ -67,7 +67,7 @@ export class MideaAccessory {
 
 
 		switch (this.deviceType) {
-			case 0x00: {
+			case MideaDeviceType.Dehumidifier: {
 				this.accessory.getService(this.platform.Service.AccessoryInformation)!.setCharacteristic(this.platform.Characteristic.Model, 'Dehumidifier')
 				this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier)
 			}
@@ -87,7 +87,7 @@ export class MideaAccessory {
 
 
 		switch (this.deviceType) {
-			case 0x00: {
+			case MideaDeviceType.Dehumidifier: {
 				this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
 				.on('get', this.handleCurrentRelativeHumidityGet.bind(this));
 

@@ -219,6 +219,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 							if (existingAccessory) {
 								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
+								
 								if (!(existingAccessory.context.hasOwnProperty('deviceType'))) {
 									this.log.debug('Device ' + existingAccessory.displayName + ' has no context, recreating');
 									this.api.unregisterPlatformAccessories('homebridge-midea', 'midea', [existingAccessory])
@@ -252,7 +253,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			);
 		});
 	}
-	sendCommand(device: MideaAccessory, order: any) {
+	sendCommand(device
+		: MideaAccessory, order: any) {
 		if (device) {
 			return new Promise((resolve, reject) => {
 				const orderEncode = Utils.encode(order);
@@ -411,8 +413,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 		this.accessories.forEach((accessory: PlatformAccessory) => {
-			this.log.debug('update accessory',accessory.context.device.deviceId)
-			let mideaAccessory = this.getMideaAccessoryById(accessory.context.deviceId);
+			this.log.debug('update accessory',accessory.context.deviceId)
+			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId === accessory.context.deviceId)
 			if (mideaAccessory) {
 				this.sendCommand(mideaAccessory, data)
 				.then(() => {
@@ -560,14 +562,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		this.accessories.push(accessory);
 	}
 
-	getMideaAccessoryById(deviceId: string): MideaAccessory | undefined {
-		for (var i=0; i<this.mideaAccessories.length; i++) {
-			if (this.mideaAccessories[i].deviceId == deviceId) {
-				return this.mideaAccessories[i];
-			}
-		}
-		return undefined;
-	}
 
 }
 
