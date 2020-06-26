@@ -220,7 +220,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 							if (existingAccessory) {
 								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
 								
-								if (!(existingAccessory.context.hasOwnProperty('deviceType'))) {
 									this.log.debug('Device ' + existingAccessory.displayName + ' has no context, recreating');
 									this.api.unregisterPlatformAccessories('homebridge-midea', 'midea', [existingAccessory])
 									const accessory = new this.api.platformAccessory(currentElement.name, uuid)
@@ -230,8 +229,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 									this.mideaAccessories.push(new MideaAccessory(this, accessory))
 									this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
-
-								}
 							} else {
 								this.log.debug('Adding new device:', currentElement.name)
 								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
