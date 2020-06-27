@@ -288,6 +288,7 @@ export class MideaAccessory {
 
    	}
 
+
    }
 
   /**
@@ -296,6 +297,8 @@ export class MideaAccessory {
    handleTemperatureDisplayUnitsSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
    	callback(null, value);
+ 	this.platform.sendUpdateToDevice(this);
+
    }
    //    * Handle requests to get the current value of the "swingMode" characteristic
    handleSwingModeGet(callback: CharacteristicGetCallback) {
