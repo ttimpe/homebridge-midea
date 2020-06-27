@@ -78,9 +78,9 @@ export default class SetCommand extends BaseCommand {
     }
 
    get useFahrenheit() {
-       return this.data[0x15] > 1
+       return this.data[0x12] > 1
     }
     set useFahrenheit(useFahrenheit : boolean) {
-        this.data[0x15] = useFahrenheit ? 0x02 : 0;
+        this.data[0x12] = useFahrenheit ? 0x01 : 0;
     }
 }
