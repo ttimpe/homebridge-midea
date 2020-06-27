@@ -326,11 +326,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						device.swingMode = response.swingMode;
 						device.operationalMode = response.operationalMode;
 						device.humidty = response.humidity
+						device.useFahrenheit = response.tempUnit
 						this.log.debug('fanSpeed is set to', response.fanSpeed);
 						this.log.debug('swingMode is set to', response.swingMode);
 						this.log.debug('powerState is set to', response.powerState);
 						this.log.debug('operational mode is set to', response.operationalMode);
-
+						this.log.debug('useFahrenheit is set to', response.tempUnit)
 
 
 
@@ -531,6 +532,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			command.swingMode = device.swingMode;
 			command.fanSpeed = device.fanSpeed;
 			command.operationalMode = device.operationalMode
+			command.useFahrenheit = device.useFahrenheit
 			//operational mode for workaround with fan only mode on device
 			const pktBuilder = new PacketBuilder();
 			pktBuilder.command = command;

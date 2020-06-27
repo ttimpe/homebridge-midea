@@ -76,4 +76,11 @@ export default class SetCommand extends BaseCommand {
     set turboMode(turboModeEnabled: boolean) {
         this.data[0x14] = turboModeEnabled ? 0x02 : 0;
     }
+
+   get useFahrenheit() {
+       return this.data[0x15] > 1
+    }
+    set useFahrenheit(useFahrenheit : boolean) {
+        this.data[0x15] = useFahrenheit ? 0x02 : 0;
+    }
 }
