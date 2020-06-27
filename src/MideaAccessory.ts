@@ -10,6 +10,7 @@ export class MideaAccessory {
 	public deviceType :MideaDeviceType = MideaDeviceType.AirConditioner
 	public targetTemperature : number = 0
 	public indoorTemperature: number = 0
+	public useFahrenheit: boolean = false
 	public fanSpeed: number = 0
 	public fanOnlyMode : boolean = false
 	public fanOnlyModeName : string = ''
@@ -280,9 +281,13 @@ export class MideaAccessory {
    	this.platform.log.debug('Triggered GET TemperatureDisplayUnits');
 
    	// set this to a valid value for TemperatureDisplayUnits
-   	const currentValue = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
+   	if (this.useFahrenheit) {
+   		callback(null, this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT)
+   	} else {
+   		callback(null, this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS)
 
-   	callback(null, currentValue);
+   	}
+
    }
 
   /**
@@ -290,8 +295,7 @@ export class MideaAccessory {
    */
    handleTemperatureDisplayUnitsSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
-
-   	callback(null);
+   	callback(null, value);
    }
    //    * Handle requests to get the current value of the "swingMode" characteristic
    handleSwingModeGet(callback: CharacteristicGetCallback) {
