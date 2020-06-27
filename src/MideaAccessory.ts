@@ -114,7 +114,14 @@ export class MideaAccessory {
 
 				this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
 				.on('get', this.handleTargetHeatingCoolingStateGet.bind(this))
-				.on('set', this.handleTargetHeatingCoolingStateSet.bind(this));
+				.on('set', this.handleTargetHeatingCoolingStateSet.bind(this))
+				.setProps({
+					validValues:[
+						this.platform.Characteristic.TargetHeatingCoolingState.AUTO,
+						this.platform.Characteristic.TargetHeatingCoolingState.COOL,
+						this.platform.Characteristic.TargetHeatingCoolingState.OFF
+					]
+				})
 
 				this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
 				.on('get', this.handleCurrentTemperatureGet.bind(this));
