@@ -15,7 +15,6 @@ import PacketBuilder from './PacketBuilder'
 import { MideaAccessory } from './MideaAccessory'
 import { MideaDeviceType } from './MideaDeviceType'
 import { MideaErrorCodes } from './MideaErrorCodes' 
-import { MigrationHelper } from './MigrationHelper'
 
 
 
@@ -41,7 +40,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	// informationService : any
 
 	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
-		new MigrationHelper(log, api.user.configPath())
 
 		this.jar = request.jar();
 
