@@ -70,7 +70,7 @@ export class MideaAccessory {
 		.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
 		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId);
 
-
+		this.platform.log.debug("Device type is ", this.deviceType)
 		switch (this.deviceType) {
 			case MideaDeviceType.Dehumidifier: {
 				this.accessory.getService(this.platform.Service.AccessoryInformation)!.setCharacteristic(this.platform.Characteristic.Model, 'Dehumidifier')
