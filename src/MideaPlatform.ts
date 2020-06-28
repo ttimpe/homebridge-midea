@@ -213,7 +213,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					if (body.result && body.result.list && body.result.list.length > 0) {
 						this.log.debug('getUserList result is', body.result);
 						body.result.list.forEach(async (currentElement: any) => {
-							if (currentElement.type == MideaDeviceType.AirConditioner || currentElement.type == MideaDeviceType.Dehumidifier) {
+							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
 							const uuid = this.api.hap.uuid.generate(currentElement.id)
 
 							const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
@@ -224,7 +224,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								existingAccessory.context.deviceType = parseInt(currentElement.type)
 								existingAccessory.context.name = currentElement.name
 								this.api.updatePlatformAccessories([existingAccessory])
-								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, currentElement.type, currentElement.name)
+								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name)
 								this.mideaAccessories.push(ma)
 							} else {
 								this.log.debug('Adding new device:', currentElement.name)
@@ -232,14 +232,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								accessory.context.deviceId = currentElement.id
 								accessory.context.name = currentElement.name
 								accessory.context.deviceType = parseInt(currentElement.type)
-								var ma = new MideaAccessory(this, accessory, currentElement.id, currentElement.type, currentElement.name)
+
+								var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name)
 								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 
 								this.mideaAccessories.push(ma)
 							}
 							this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 							} else {
-								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[currentElement.type])
+								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
 								this.log.warn('Please open an issue on GitHub with your specific device model')
 							}
 
