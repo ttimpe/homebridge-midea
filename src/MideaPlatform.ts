@@ -13,7 +13,9 @@ import SetCommand from './SetCommand'
 import PacketBuilder from './PacketBuilder'
 
 import { MideaAccessory } from './MideaAccessory'
+import { MideaDeviceType } from './MideaDeviceType'
 import { MideaErrorCodes } from './MideaErrorCodes' 
+import { MigrationHelper } from './MigrationHelper'
 
 
 
@@ -39,7 +41,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	// informationService : any
 
 	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
-
+		new MigrationHelper(log, api.user.configPath())
 
 		this.jar = request.jar();
 
@@ -213,6 +215,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					if (body.result && body.result.list && body.result.list.length > 0) {
 						this.log.debug('getUserList result is', body.result);
 						body.result.list.forEach(async (currentElement: any) => {
+							if (currentElement.type == MideaDeviceType.AirConditioner || currentElement.type == MideaDeviceType.Dehumidifier) {
 							const uuid = this.api.hap.uuid.generate(currentElement.id)
 
 							const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
@@ -237,7 +240,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								this.mideaAccessories.push(ma)
 							}
 							this.log.debug('mideaAccessories now contains', this.mideaAccessories)
-
+							} else {
+								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[currentElement.type])
+								this.log.warn('Please open an issue on GitHub with your specific device model')
+							}
 
 						});
 					}

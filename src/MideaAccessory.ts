@@ -77,8 +77,12 @@ export class MideaAccessory {
 				this.service = this.accessory.getService(this.platform.Service.HumidifierDehumidifier) || this.accessory.addService(this.platform.Service.HumidifierDehumidifier)
 			}
 			break
-			default: {
+			case MideaDeviceType.AirConditioner: {
 				this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler)
+			}
+			break
+			default: {
+				this.platform.log.error('Unsupported device type ', MideaDeviceType[this.deviceType])
 			}
 			break;
 
@@ -108,7 +112,7 @@ export class MideaAccessory {
 
 			}
 			break
-			default: {
+			case MideaDeviceType.AirConditioner: {
 				this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
 				.on('get', this.handleCurrentHeatingCoolingStateGet.bind(this));
 
@@ -117,9 +121,9 @@ export class MideaAccessory {
 				.on('set', this.handleTargetHeatingCoolingStateSet.bind(this))
 				.setProps({
 					validValues:[
-						this.platform.Characteristic.TargetHeatingCoolingState.AUTO,
-						this.platform.Characteristic.TargetHeatingCoolingState.COOL,
-						this.platform.Characteristic.TargetHeatingCoolingState.OFF
+					this.platform.Characteristic.TargetHeatingCoolingState.AUTO,
+					this.platform.Characteristic.TargetHeatingCoolingState.COOL,
+					this.platform.Characteristic.TargetHeatingCoolingState.OFF
 					]
 				})
 
@@ -149,18 +153,11 @@ export class MideaAccessory {
 
 			}
 			break
+			default: {
+				this.platform.log.warn('Unsupported device type', MideaDeviceType[this.deviceType])
+			}
 		}
 		
-/*
-		this.service.getCharacteristic(Characteristic.SwingMode)
-		.on('get', this.handleSwingModeGet.bind(this))
-		.on('set', this.handleSwingModeSet.bind(this));
-
-		this.service.getCharacteristic(Characteristic.RotationSpeed)
-		.on('get', this.handleRotationSpeedGet.bind(this))
-		.on('set', this.handleRotationSpeedSet.bind(this));
-
-		*/
 	}
 
    /**
@@ -304,7 +301,7 @@ export class MideaAccessory {
    handleTemperatureDisplayUnitsSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
    	callback(null, value);
- 	this.platform.sendUpdateToDevice(this);
+   	this.platform.sendUpdateToDevice(this);
 
    }
    //    * Handle requests to get the current value of the "swingMode" characteristic
