@@ -13,6 +13,7 @@ export class MigrationHelper {
 			let file = fs.readFileSync(configFilePath)
 			let config = JSON.parse(file)
 			let migratedConfig = this.migrate(config);
+			this.backupConfig();
 			if (this.writeNewConfig(migratedConfig)) {
 				this.restartHomebridge();
 			}
@@ -33,6 +34,17 @@ export class MigrationHelper {
 		})
 		return false
 	}
+	backupConfig() {
+		let file = fs.readFileSync(this.configFilePath)
+		fs.writeFile(this.configFilePath + '.bak', file, 'utf-8', (err: Error) => {
+			if (err) {
+				this.log.warn("Error making backup of config")
+			} else {
+				this.log.debug("Made backup of config.json")
+			}
+		});
+
+	}
 	migrate(config: any) {
 		let platformObject = {
 			"platform": "midea",
@@ -44,7 +56,7 @@ export class MigrationHelper {
 			for (var i=0; i<config.platforms.length; i++) {
 				if (config.platforms[i].platform == 'midea') {
 					// We already have a platform, return
-					return true
+					return null
 				}
 			}
 		} else {
