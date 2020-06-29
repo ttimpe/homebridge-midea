@@ -5,6 +5,7 @@ export default class ApplianceResponse {
         this.data = data.slice(0x32);
         //if(__debug__):
         //    print("Appliance response data: {}".format(self.data.hex()))
+
     }
 
     // Byte 0x01
@@ -117,7 +118,7 @@ export default class ApplianceResponse {
 
     get tempUnit() {
         // This needs a better name, dunno what it actually means
-        return (this.data[0x09] & 0x80) > 0;
+        return this.data[23] > 0;
     }
 
     // Byte 0x0a
