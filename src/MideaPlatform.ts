@@ -418,7 +418,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		this.accessories.forEach((accessory: PlatformAccessory) => {
 			this.log.debug('update accessory',accessory.context.deviceId)
-			this.log.debug('current ma are ', this.mideaAccessories)
+			// this.log.debug('current ma are ', this.mideaAccessories)
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory) {
 				this.sendCommand(mideaAccessory, data)
