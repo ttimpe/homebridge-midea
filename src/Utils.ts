@@ -27,4 +27,20 @@ export default class Utils {
      	return date.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");
      }
 
+     static formatResponse(arr: any[]) {
+          let output : number[] = []
+
+          for (var i=0; i<arr.length; i++) {
+               let intValue = parseInt(arr[i]);
+               if (intValue < 0) {
+                    intValue = intValue + 256;
+               }
+               output.push(intValue)
+
+          }
+          return output;
+
+     }
+
+
 }

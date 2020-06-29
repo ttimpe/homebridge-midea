@@ -338,7 +338,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						this.log.debug('operational mode is set to', response.operationalMode);
 						this.log.debug('useFahrenheit is set to', response.tempUnit)
 
-						this.log.debug('Full data is', response.data)
+						this.log.debug('Full data is', Utils.formatResponse(response.data))
 
 						resolve();
 					} catch (error) {
