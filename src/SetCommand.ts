@@ -87,7 +87,7 @@ export default class SetCommand extends BaseCommand {
     }
     set useFahrenheit(useFahrenheit : any) {
       // this.flipBitOfByte(this.data[0x14], 2)
-        this.data[0x14] = 8
+        this.data[0x14] = 2
     }
 
     flipBitOfByte(data: number, bitToFlip: number) {
