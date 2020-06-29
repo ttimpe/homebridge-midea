@@ -117,7 +117,7 @@ export default class ApplianceResponse {
 
     get tempUnit() {
         // This needs a better name, dunno what it actually means
-        return (this.data[0x14] & (1 << 2)) > 0;
+        return (this.data[0x09] & 0x80) > 0;
     }
 
     // Byte 0x0a
