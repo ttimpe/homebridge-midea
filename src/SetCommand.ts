@@ -78,15 +78,16 @@ export default class SetCommand extends BaseCommand {
     }
 
    get useFahrenheit() {
-       if (this.data[0x14] & (1 << 2)) {
+   /*    if (this.data[0x14] & (1 << 2)) {
            return true;
         } else {
             return false;
-        }
+        }*/
+        return true;
     }
     set useFahrenheit(useFahrenheit : boolean) {
       // this.flipBitOfByte(this.data[0x14], 2)
-          if (useFahrenheit) {
+          if (useFahrenheit == true) {
             this.data[0x14] |= 1 << 2
           } else {
               this.data[0x14] &= ~(1 << 2)
