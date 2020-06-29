@@ -78,7 +78,7 @@ export default class SetCommand extends BaseCommand {
     }
 
    get useFahrenheit() {
-       if (this.data[0x14] & 0x02) {
+       if (this.data[0x14] & (1 << 2)) {
            return true;
         } else {
             return false;
