@@ -300,6 +300,11 @@ export class MideaAccessory {
    */
    handleTemperatureDisplayUnitsSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
+   	if (value == this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
+		this.useFahrenheit = true;
+	} else {
+		this.useFahrenheit = false;
+	}
    	callback(null, value);
    	this.platform.sendUpdateToDevice(this);
 
