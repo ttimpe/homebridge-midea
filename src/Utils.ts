@@ -28,14 +28,12 @@ export default class Utils {
      }
 
      static formatResponse(arr: any[]) {
-          let output : number[] = []
+          let output : string[] = []
 
           for (var i=0; i<arr.length; i++) {
                let intValue = parseInt(arr[i]);
-               if (intValue < 0) {
-                    intValue = intValue + 256;
-               }
-               output.push(intValue)
+
+               output.push((intValue).toString(2))
 
           }
           return output;
