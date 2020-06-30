@@ -239,7 +239,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 									this.mideaAccessories.push(ma)
 								}
-								this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+								// this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 							} else {
 								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
 								this.log.warn('Please open an issue on GitHub with your specific device model')
@@ -472,7 +472,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			userId: device.userId
 		};
 		let data = this.encryptAesString(JSON.stringify(requestObject))
-
+		this.log.debug(JSON.stringify(requestObject))
 		return new Promise((resolve, reject) => {
 
 			const form :any = {
