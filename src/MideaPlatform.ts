@@ -48,7 +48,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		this.baseHeader = { 'User-Agent': Constants.UserAgent }
 		this.log = log;
 		this.config = config;
-    	api.on('didFinishLaunching', () => {
+		api.on('didFinishLaunching', () => {
 			this.onReady();
 		})
 	}
@@ -214,31 +214,32 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						this.log.debug('getUserList result is', body.result);
 						body.result.list.forEach(async (currentElement: any) => {
 							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
-							const uuid = this.api.hap.uuid.generate(currentElement.id)
+								const uuid = this.api.hap.uuid.generate(currentElement.id)
 
-							const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
+								const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
 
-							if (existingAccessory) {
-								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-								existingAccessory.context.deviceId = currentElement.id
-								existingAccessory.context.deviceType = parseInt(currentElement.type)
-								existingAccessory.context.name = currentElement.name
-								this.api.updatePlatformAccessories([existingAccessory])
-								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name)
-								this.mideaAccessories.push(ma)
-							} else {
-								this.log.debug('Adding new device:', currentElement.name)
-								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
-								accessory.context.deviceId = currentElement.id
-								accessory.context.name = currentElement.name
-								accessory.context.deviceType = parseInt(currentElement.type)
+								if (existingAccessory) {
+									this.log.debug('Restoring cached accessory', existingAccessory.displayName)
+									existingAccessory.context.deviceId = currentElement.id
+									existingAccessory.context.deviceType = parseInt(currentElement.type)
+									existingAccessory.context.name = currentElement.name
+									this.api.updatePlatformAccessories([existingAccessory])
 
-								var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name)
-								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+									var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+									this.mideaAccessories.push(ma)
+								} else {
+									this.log.debug('Adding new device:', currentElement.name)
+									const accessory = new this.api.platformAccessory(currentElement.name, uuid)
+									accessory.context.deviceId = currentElement.id
+									accessory.context.name = currentElement.name
+									accessory.context.deviceType = parseInt(currentElement.type)
 
-								this.mideaAccessories.push(ma)
-							}
-							this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+									var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+
+									this.mideaAccessories.push(ma)
+								}
+								this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 							} else {
 								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
 								this.log.warn('Please open an issue on GitHub with your specific device model')
@@ -397,6 +398,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		const dec = decipher.update(reply, "hex", "utf8");
 		return dec.split(",");
 	}
+	decryptAesString(reply: number[]) {
+		if (!this.dataKey) {
+			this.generateDataKey();
+		}
+		const decipher = crypto.createDecipheriv("aes-128-ecb", this.dataKey, "");
+		const dec = decipher.update(reply, "hex", "utf8");
+		return dec;
+	}
 
 
 	encryptAes(query: number[]) {
@@ -405,6 +414,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		}
 		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
 		let ciph = cipher.update(query.join(","), "utf8", "hex");
+		ciph += cipher.final("hex");
+		return ciph;
+	}
+	encryptAesString(query: string) {
+		if (!this.dataKey) {
+			this.generateDataKey();
+		}
+		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
+		let ciph = cipher.update(query, "utf8", "hex");
 		ciph += cipher.final("hex");
 		return ciph;
 	}
@@ -420,7 +438,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.log.debug('update accessory',accessory.context.deviceId)
 			// this.log.debug('current ma are ', this.mideaAccessories)
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
-			if (mideaAccessory) {
+			if (mideaAccessory === undefined) {
+				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
+				
+			} else {
 				this.sendCommand(mideaAccessory, data)
 				.then(() => {
 					this.log.debug("Update successful");
@@ -440,14 +461,18 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						this.log.debug("Login failed");
 					});
 				});
-			} else {
-				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
 			}
 		});
 
 	}
 
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
+		let requestObject : object = {
+			applianceId: device.deviceId,
+			userId: device.userId
+		};
+		let data = this.encryptAesString(JSON.stringify(requestObject))
+
 		return new Promise((resolve, reject) => {
 
 			const form :any = {
@@ -458,9 +483,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp(),
 				language: Constants.Language,
 				sessionId: this.sessionId,
-				data: {} 
+				serviceUrl: "/ota/queryOtaStaus",
+				data: data
 			};
-			const url = "https://mapp.appsmb.com/v1/appliance/transparent/send";
+			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/queryOtaStaus";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
 			request.post(
@@ -500,6 +526,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					return;
 				}
 				try {
+
+					let decryptedString = this.decryptAesString(body.result.returnData)
+					this.log.debug('Got firmware response', decryptedString)
+					let responseObject = JSON.parse(decryptedString)
+					device.firmwareVersion = responseObject.result.version
+					this.log.debug('got firmware version', device.firmwareVersion)
+
+					
+				/*
 					this.log.debug("send successful");
 					const response :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
 					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
@@ -517,6 +552,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					this.log.debug('swingMode is set to', response.swingMode);
 					this.log.debug('powerState is set to', response.powerState);
 					this.log.debug('operational mode is set to', response.operationalMode);
+					*/
 					resolve();
 				} catch (error) {
 					this.log.debug(body);

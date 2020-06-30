@@ -21,9 +21,11 @@ export class MideaAccessory {
 	public swingMode :number = 0
 	public name: string = ''
 	public humidty: number = 0
+	public userId: string = ''
+	public firmwareVersion: string = '0.0'
 
 
-	private service: Service
+	private service!: Service
 
 
 	constructor(
@@ -31,11 +33,13 @@ export class MideaAccessory {
 		private readonly accessory: PlatformAccessory,
 		private _deviceId: string,
 		private _deviceType: MideaDeviceType,
-		private _name : string
+		private _name : string,
+		private _userId: string
 		) {
 		this.deviceId = _deviceId
 		this.deviceType = _deviceType
 		this.name = _name
+		this.userId = _userId
 
 		// Check for device specific overrides
 		if (platform.config.devices && platform.config.devices[this.deviceId]) {
@@ -63,12 +67,17 @@ export class MideaAccessory {
 
 
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
-
+		this.platform.getFirmwareVersionOfDevice(this).then(()=> {
+		this.platform.log.debug('Got firmware, setting version')
 		this.accessory.getService(this.platform.Service.AccessoryInformation)!
 		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
-		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, '0.0.1')
+		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
 		.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
 		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId);
+		}).catch(() => {
+			this.platform.log.debug('Could not get firmware version');
+		})
+
 
 		this.platform.log.debug("Device type is ", this.deviceType)
 		switch (this.deviceType) {
@@ -82,7 +91,9 @@ export class MideaAccessory {
 			}
 			break
 			default: {
+
 				this.platform.log.error('Unsupported device type ', MideaDeviceType[this.deviceType])
+				return
 			}
 			break;
 
