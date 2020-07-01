@@ -470,7 +470,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		let requestObject : object = {
 			applianceId: parseInt(device.deviceId)
 		};
-		let data = this.encryptAesString(JSON.stringify(requestObject).slice(0,48))
+		let data = this.encryptAesString(JSON.stringify(requestObject))
 		this.log.debug(JSON.stringify(requestObject))
 		return new Promise((resolve, reject) => {
 

@@ -312,7 +312,7 @@ export default class Constants {
 	public static UserAgent :string = 'Dalvik/2.1.0 (Linux; U; Android 7.0; SM-G935F Build/NRD90M)'
 	public static AppId : string = '1117'
 	public static AppKey : string = 'ff0cf6f5f0c3471de36341cab3f7a9af'
-	public static Language : string = 'de-DE'
+	public static Language : string = 'en-US '
 	public static ClientType: string = '1'
 	public static RequestFormat :string = '2'
 	public static RequestSource :string = '17'
