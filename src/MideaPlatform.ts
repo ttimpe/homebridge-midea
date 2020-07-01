@@ -493,6 +493,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
+
+			this.log.debug('we are sending the following form', form)
 			request.post(
 			{
 				url: url,
