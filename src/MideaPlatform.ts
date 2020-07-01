@@ -479,7 +479,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		return new Promise((resolve, reject) => {
 
 			const form :any = {
-				applianceId: device.deviceId,
 				src: Constants.RequestSource,
 				format: Constants.RequestFormat,
 				protoType: '0x01',
@@ -487,6 +486,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				language: Constants.Language,
 				sessionId: this.sessionId,
 				data: data,
+				appId: Constants.AppId,
 				serviceUrl: '/ota/version'
 			};
 			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
