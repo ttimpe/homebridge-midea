@@ -474,6 +474,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			userId: device.userId
 		};
 		let data = this.encryptAesString(JSON.stringify(requestObject))
+		this.log.debug('encrypted string is', data);
 		this.log.debug(JSON.stringify(requestObject))
 		return new Promise((resolve, reject) => {
 
