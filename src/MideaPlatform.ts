@@ -485,8 +485,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				data: data,
 				serviceUrl: '/ota/version'
 			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
+			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit";
 			const sign = this.getSign(url, form);
+
 			form.sign = sign;
 			request.post(
 			{
