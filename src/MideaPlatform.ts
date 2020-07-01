@@ -482,7 +482,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp(),
 				language: Constants.Language,
 				sessionId: this.sessionId,
-				serviceUrl: "/ota/queryOtaStaus",
+				serviceUrl: "/ota/version",
 				data: data
 			};
 			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
