@@ -357,7 +357,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		}
 	}
 	getSign(path: string, form: any) {
-		const postfix = "/" + path.split("/").slice(3).join("/");
+		let postfix = "/" + path.split("/").slice(3).join("/");
+		// Maybe this will help, should remove any query string parameters in the URL from the sign
+		postfix = postfix.split('?')[0]
 		const ordered : any = {};
 		Object.keys(form)
 		.sort()
@@ -485,7 +487,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				data: data,
 				serviceUrl: '/ota/version'
 			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit";
+			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
