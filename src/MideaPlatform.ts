@@ -482,10 +482,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp(),
 				language: Constants.Language,
 				sessionId: this.sessionId,
-				serviceUrl: "/ota/version",
-				data: data
+				data: data,
+				serviceUrl: '/ota/version'
 			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
+			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
 			request.post(
@@ -497,6 +497,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				form: form,
 				jar: this.jar,
 				gzip: true,
+
 			}, (err: any, resp: any, body: any) => {
 				if (err || (resp && resp.statusCode >= 400) || !body) {
 					this.log.debug("Failed to send command");
