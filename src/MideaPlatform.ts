@@ -468,8 +468,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
 		let requestObject : object = {
-			applianceId: device.deviceId,
-			userId: device.userId
+			applianceId: parseInt(device.deviceId)
 		};
 		let data = this.encryptAesString(JSON.stringify(requestObject).slice(0,48))
 		this.log.debug(JSON.stringify(requestObject))
@@ -486,7 +485,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				serviceUrl: "/ota/queryOtaStaus",
 				data: data
 			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/queryOtaStaus";
+			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
 			request.post(
