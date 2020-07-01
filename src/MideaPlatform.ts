@@ -470,7 +470,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
 		let requestObject : object = {
-			applianceId: parseInt(device.deviceId)
+			applianceId: device.deviceId,
+			userId: device.userId
 		};
 		let data = this.encryptAesString(JSON.stringify(requestObject))
 		this.log.debug(JSON.stringify(requestObject))
