@@ -367,7 +367,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			ordered[key] = form[key];
 		});
 		const query = Object.keys(ordered)
-		.map((key) => key + "=" + encodeURIComponent(ordered[key]))
+		.map((key) => key + "=" + ordered[key])
 		.join("&");
 
 		return crypto
@@ -515,7 +515,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				url: url,
 				headers: this.baseHeader,
 				followAllRedirects: true,
-				body: this.manualFormEncode(form),
+				form: form,
 				jar: this.jar,
 				gzip: true,
 				proxy: 'http://192.168.1.252:8080',
