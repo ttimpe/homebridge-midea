@@ -468,6 +468,17 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 	}
 
+	manualFormEncode(form: any) {
+		let outputString = '';
+		for (var prop in form) {
+			if (form.hasOwnProperty(prop)) {
+				outputString += '&' + prop + '=' + form[prop];
+			}
+		}
+		return outputString.slice(1);
+
+	}
+
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
 		let requestObject : object = {
 			applianceId: device.deviceId,
@@ -494,7 +505,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
-			delete form.serviceUrl
 
 			this.log.debug('we are sending the following form', form)
 			request.post(
@@ -503,7 +513,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				headers: this.baseHeader,
 				followAllRedirects: true,
 				json: true,
-				form: form,
+				body: this.manualFormEncode(form),
 				jar: this.jar,
 				gzip: true,
 				proxy: 'http://192.168.1.252:8080',
