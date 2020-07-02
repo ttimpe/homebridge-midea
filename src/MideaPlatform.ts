@@ -487,12 +487,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				language: Constants.Language,
 				sessionId: this.sessionId,
 				data: data,
-				appId: Constants.AppId
+				appId: Constants.AppId,
+				serviceUrl: '/ota/version'
 			};
 			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
+			delete form.serviceUrl
 
 			this.log.debug('we are sending the following form', form)
 			request.post(
@@ -501,7 +503,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				headers: this.baseHeader,
 				followAllRedirects: true,
 				json: true,
-				form: form,
+				qs: form,
 				jar: this.jar,
 				gzip: true,
 				proxy: 'http://192.168.1.252:8080',
