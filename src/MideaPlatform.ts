@@ -512,7 +512,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				url: url,
 				headers: this.baseHeader,
 				followAllRedirects: true,
-				json: true,
 				body: this.manualFormEncode(form),
 				jar: this.jar,
 				gzip: true,
