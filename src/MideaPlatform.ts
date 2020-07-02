@@ -359,7 +359,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	getSign(path: string, form: any) {
 		let postfix = "/" + path.split("/").slice(3).join("/");
 		// Maybe this will help, should remove any query string parameters in the URL from the sign
-		//postfix = postfix.split('?')[0]
+		postfix = postfix.split('?')[0]
 		const ordered : any = {};
 		Object.keys(form)
 		.sort()
@@ -367,7 +367,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			ordered[key] = form[key];
 		});
 		const query = Object.keys(ordered)
-		.map((key) => key + "=" + ordered[key])
+		.map((key) => key + "=" + encodeURIComponent(ordered[key]))
 		.join("&");
 
 		return crypto
@@ -469,13 +469,16 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	}
 
 	manualFormEncode(form: any) {
-		let outputString = '';
-		for (var prop in form) {
-			if (form.hasOwnProperty(prop)) {
-				outputString += '&' + prop + '=' + form[prop];
-			}
-		}
-		return outputString.slice(1);
+		const ordered : any = {};
+		Object.keys(form)
+		.sort()
+		.forEach(function (key: any) {
+			ordered[key] = form[key];
+		});
+		const query = Object.keys(ordered)
+		.map((key) => key + "=" + ordered[key])
+		.join("&");
+		return query;
 
 	}
 
@@ -491,15 +494,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		return new Promise((resolve, reject) => {
 
 			const form :any = {
-				src: Constants.RequestSource,
-				format: Constants.RequestFormat,
-				protoType: '0x01',
-				stamp: Utils.getStamp(),
-				language: Constants.Language,
-				sessionId: this.sessionId,
-				data: data,
 				appId: Constants.AppId,
-				serviceUrl: '/ota/version'
+				data: data,
+				format: Constants.RequestFormat,
+				language: Constants.Language,
+				protoType: '0x01',
+				serviceUrl: '/ota/version',
+				sessionId: this.sessionId,
+				src: Constants.RequestSource,
+				stamp: Utils.getStamp()
 			};
 			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
 			const sign = this.getSign(url, form);
