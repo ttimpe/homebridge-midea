@@ -424,7 +424,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.generateDataKey();
 		}
 		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query+query, "utf8", "hex");
+		let ciph = cipher.update(query, "utf8", "hex");
 		ciph += cipher.final("hex");
 		return ciph;
 	}
@@ -505,6 +505,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				form: form,
 				jar: this.jar,
 				gzip: true,
+				proxy: 'http://192.168.1.252:8080',
+				strictSSL: false
 
 			}, (err: any, resp: any, body: any) => {
 				if (err || (resp && resp.statusCode >= 400) || !body) {
