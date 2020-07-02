@@ -424,7 +424,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.generateDataKey();
 		}
 		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query, "utf8", "hex");
+		let ciph = cipher.update(query+query, "utf8", "hex");
 		ciph += cipher.final("hex");
 		return ciph;
 	}
@@ -474,6 +474,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			userId: device.userId
 		};
 		let data = this.encryptAesString(JSON.stringify(requestObject))
+
 		this.log.debug('encrypted string is', data);
 		this.log.debug(JSON.stringify(requestObject))
 		return new Promise((resolve, reject) => {
