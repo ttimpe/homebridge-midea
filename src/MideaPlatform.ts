@@ -503,7 +503,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				headers: this.baseHeader,
 				followAllRedirects: true,
 				json: true,
-				qs: form,
+				form: form,
 				jar: this.jar,
 				gzip: true,
 				proxy: 'http://192.168.1.252:8080',
