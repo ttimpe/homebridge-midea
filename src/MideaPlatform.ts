@@ -518,6 +518,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				form: form,
 				jar: this.jar,
 				gzip: true,
+				json: true,
 				proxy: 'http://192.168.1.252:8080',
 				strictSSL: false
 
