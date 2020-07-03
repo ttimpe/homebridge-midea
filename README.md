@@ -12,12 +12,13 @@ Add this to the platforms array in your config.json:
 	    "user": "MIDEA_ACCOUNT_EMAIL",
 	    "password": "MIDEA_PASSWORD",
 	    "interval": 1,
-	    "devices": {
-	    	"ID_OF_DEVICE": {
+	    "devices": [
+	    	{
+	    		"deviceId": "DEVICE_ID"
 	    		"supportedSwingMode": "Vertical",
 				"temperatureSteps": 1
 	    	}
-	    }
+	    ]
 	}
 
 ## Optional per-device Configuration Values

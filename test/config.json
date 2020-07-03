@@ -19,12 +19,13 @@
       "interval": 1,
       "user": "test@midea.com",
       "password": "test password",
-      "devices": {
-        "ID_OF_DEVICE": {
+      "devices": [
+        {
+          "deviceId": "DEVICE_ID",
           "supportedSwingMode": "Vertical",
           "temperatureSteps": 1
         }
-      }
+      ]
     }
   ]
 }
