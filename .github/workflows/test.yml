@@ -44,7 +44,7 @@ jobs:
         mv $GITHUB_WORKSPACE/*.tgz p.tgz
         mkdir ~/.homebridge
         cp $GITHUB_WORKSPACE/test/config.json ~/.homebridge/config.json
-        npm install -g $GITHUB_WORKSPACE/p.tgz
+        sudo npm install -g $GITHUB_WORKSPACE/p.tgz
         chmod +x $GITHUB_WORKSPACE/test/test.sh
     # Test if homebridge doesn't crash
     - name: Running homebridge
