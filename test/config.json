@@ -1,0 +1,31 @@
+
+{
+  "bridge": {
+    "name": "Homebridge",
+    "username": "CC:22:3D:E3:CE:30",
+    "manufacturer": "homebridge.io",
+    "model": "homebridge",
+    "port": 51826,
+    "pin": "031-45-154"
+  },
+  
+  "ports": {
+    "start": 52100,
+    "end": 52150
+  },
+  "platforms": [
+  	{
+      "platform": "midea",
+      "interval": 1,
+      "user": "test@midea.com",
+      "password": "test password",
+      "devices": [
+        {
+          "deviceId": "DEVICE_ID",
+          "supportedSwingMode": "Vertical",
+          "temperatureSteps": 1
+        }
+      ]
+    }
+  ]
+}

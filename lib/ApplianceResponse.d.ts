@@ -1,0 +1,35 @@
+export default class ApplianceResponse {
+    data: any;
+    constructor(data: any);
+    get powerState(): boolean;
+    get imodeResume(): boolean;
+    get timerMode(): boolean;
+    get applianceError(): boolean;
+    get targetTemperature(): number;
+    get operationalMode(): number;
+    get fanSpeed(): number;
+    get onTimer(): any;
+    get offTimer(): any;
+    get swingMode(): any;
+    get cozySleep(): any;
+    get save(): any;
+    get lowFrequencyFan(): boolean;
+    get superFan(): boolean;
+    get feelOwn(): boolean;
+    get childSleepMode(): boolean;
+    get exchangeAir(): boolean;
+    get dryClean(): boolean;
+    get auxHeat(): boolean;
+    get ecoMode(): boolean;
+    get cleanUp(): boolean;
+    get tempUnit(): boolean;
+    get sleepFunction(): boolean;
+    get turboMode(): boolean;
+    get catchCold(): boolean;
+    get nightLight(): boolean;
+    get peakElec(): boolean;
+    get naturalFan(): boolean;
+    get indoorTemperature(): number;
+    get outdoorTemperature(): number;
+    get humidity(): number;
+}

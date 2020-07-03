@@ -24,7 +24,7 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: Install packages
-      run: sudo apt install -y curl screen
+      run: sudo apt install -y curl
     - name: Install Node
       run: |
         curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
@@ -33,17 +33,19 @@ jobs:
     - name: Install homebridge
       run: sudo npm install --unsafe-perm -g homebridge
     
-    - name: npm install and build
+    - name: npm install, build and pack
       run: |
         cd $GITHUB_WORKSPACE
         npm install
-        npm build
+        npm run build
+        npm pack
     - name: Copying test config to right place
       run: |
+        mv $GITHUB_WORKSPACE/*.tgz p.tgz
         mkdir ~/.homebridge
         cp $GITHUB_WORKSPACE/test/config.json ~/.homebridge/config.json
-        sudo cp -R $GITHUB_WORKSPACE/lib /usr/lib/node_modules/homebridge-midea
+        sudo npm install -g $GITHUB_WORKSPACE/p.tgz
         chmod +x $GITHUB_WORKSPACE/test/test.sh
-    # Run homebridge in screen
+    # Test if homebridge doesn't crash
     - name: Running homebridge
       run: $GITHUB_WORKSPACE/test/test.sh
