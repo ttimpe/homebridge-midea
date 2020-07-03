@@ -6,7 +6,8 @@
   "files": [
     "/lib",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "config.schema.json"
   ],
   "engines": {
     "node": ">=12.0.0",
