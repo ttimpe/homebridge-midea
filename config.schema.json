@@ -13,7 +13,10 @@
       },
       "password": {
         "title": "Midea account password",
-        "type": "string"
+        "type": "string",
+        "x-schema-form": {
+            "type": "password"
+        }
       },
       "interval": {
         "title": "Update interval in minutes",
@@ -29,7 +32,7 @@
                     "title": "Device ID",
                     "type": "string"
                 },
-                "supportedSwingMode": {
+                "supportedSwingModes": {
                     "title": "Supported Swing Modes",
                     "type": "string",
                     "required": true,
@@ -51,14 +54,12 @@
                         "enum": ["Both"]
                     }
                 ]
-            },
-            "temperatureSteps":{
-              "title": "temperature steps",
-              "type": "number"
             }
             }
         }
       }
     }
-  }
+  },
+  "form": null,
+  "display": null
 }

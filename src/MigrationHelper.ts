@@ -2,6 +2,10 @@ const fs = require('fs');
 
 import { Logger } from 'homebridge'
 
+
+/*
+	MigrationHelper – Migrates the user's config.json from the old accessory to a platform
+*/
 export class MigrationHelper {
 	log: Logger
 	configFilePath :string = ''
@@ -21,6 +25,8 @@ export class MigrationHelper {
 			}
 		}
 	}
+
+	// This method writes the new config file after the old accessory has been removed and the new platform added
 	writeNewConfig(config: object) {
 		let configString = JSON.stringify(config, null, '\t')
 		fs.writeFile(this.configFilePath, configString, 'utf-8', (err: Error) => {
@@ -36,17 +42,27 @@ export class MigrationHelper {
 		})
 		return false
 	}
+
+	// This method creates a backup of the user's existing configuration
 	backupConfig() {
 		let file = fs.readFileSync(this.configFilePath)
+		try {
 		fs.writeFile(this.configFilePath + '.bak', file, 'utf-8', (err: Error) => {
 			if (err) {
 				this.log.warn("Error making backup of config")
 			} else {
 				this.log.debug("Made backup of config.json")
+				
 			}
 		});
 
+		}catch (e) {
+			return false;
+		}
+
 	}
+
+	// This method performs the permutation of the config object and removes the old accessory and adds the platform
 	migrate(config: any) {
 		let platformObject = {
 			"platform": "midea",
@@ -82,7 +98,7 @@ export class MigrationHelper {
 			return config
 		}
 	}
-
+	// Crude method of "restarting" homebridge, ideally there should be something better here
 	restartHomebridge() {
 		process.exit(1)
 	}

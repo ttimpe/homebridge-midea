@@ -169,7 +169,7 @@ export class MideaAccessory {
 				this.platform.log.warn('Unsupported device type', MideaDeviceType[this.deviceType])
 			}
 		}
-		}
+	}
 
    /**
    * Handle requests to get the current value of the "Active" characteristic

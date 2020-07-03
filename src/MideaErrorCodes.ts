@@ -1,3 +1,6 @@
+/*
+	MideaErrorCodes enum – This is a list of errors and their meaning to better understand them in code
+*/
 export enum MideaErrorCodes {
 	DeviceUnreachable = 3123,
 	CommandNotAccepted = 3176,

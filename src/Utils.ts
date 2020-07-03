@@ -1,3 +1,5 @@
+// Utils – Utility functions
+
 export default class Utils {
  static encode(data: number[]) : number[] {
      	const normalized = [];
@@ -22,6 +24,7 @@ export default class Utils {
      	}
      	return normalized;
      }
+     // Returns a timestamp in the format YYYYMMDDHHmmss
      static getStamp() : string {
      	const date = new Date();
      	return date.toISOString().slice(0, 19).replace(/-/g, "").replace(/:/g, "").replace(/T/g, "");

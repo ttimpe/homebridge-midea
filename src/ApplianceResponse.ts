@@ -3,9 +3,6 @@ export default class ApplianceResponse {
     constructor(data :any) {
         // The response data from the appliance includes a packet header which we don't want
         this.data = data.slice(0x32);
-        //if(__debug__):
-        //    print("Appliance response data: {}".format(self.data.hex()))
-
     }
 
     // Byte 0x01

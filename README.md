@@ -50,7 +50,7 @@ Rotation Speed values are:
 
 ## Notes
 
-This version of ```homebridge-midea```is a platform and should be able to access all device in the user's account. However, many devices may not be supported or function incorrectly. This is due to the lack of documentation of the raw MSmart API. If you encounter any problems, please open a new issue and specify your device model.
+This version of ```homebridge-midea``` is a platform and should be able to access all device in the user's account. However, many devices may not be supported or function incorrectly. This is due to the lack of documentation of the raw MSmart API. If you encounter any problems, please open a new issue and specify your device model.
 
 
 ## Credits
