@@ -618,7 +618,18 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.updateValues();
 		}
 	}
-
+	getDeviceSpecificOverrideValue(deviceId: string, key: string) {
+		if (this.config) {
+			if (this.config.hasOwnProperty('devices')) {
+				for (let i=0; i<this.config.devices.length; i++) {
+					if (this.config.devices[i].deviceId == deviceId) {
+						return this.config.devices[i][key];
+					}
+				}
+			}
+		}
+		return null;
+	}
 
 
 	configureAccessory(accessory: PlatformAccessory) {

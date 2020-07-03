@@ -42,9 +42,10 @@ export class MideaAccessory {
 		this.userId = _userId
 
 		// Check for device specific overrides
-		if (platform.config.devices && platform.config.devices[this.deviceId]) {
-			if (platform.config.devices[this.deviceId].hasOwnProperty('supportedSwingMode')) {
-				switch (platform.config.devices[this.deviceId].supportedSwingMode) {
+		var smode = this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'supportedSwingMode');
+
+		if (smode) {
+				switch (smode) {
 					case 'Vertical':
 					this.supportedSwingMode = MideaSwingMode.Vertical;
 					break;
@@ -58,11 +59,11 @@ export class MideaAccessory {
 					this.supportedSwingMode = MideaSwingMode.None;
 					break;
 				}
-			}
-			if (platform.config.devices[this.deviceId].hasOwnProperty('temperatureSteps')) {
-				this.temperatureSteps = platform.config.devices[this.deviceId].temperatureSteps;
-			}
+		}
 
+		var tsteps = this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'temperatureSteps');
+		if (tsteps) {
+			this.temperatureSteps = tsteps;
 		}
 
 
@@ -168,8 +169,7 @@ export class MideaAccessory {
 				this.platform.log.warn('Unsupported device type', MideaDeviceType[this.deviceType])
 			}
 		}
-		
-	}
+		}
 
    /**
    * Handle requests to get the current value of the "Active" characteristic
@@ -212,6 +212,7 @@ export class MideaAccessory {
 
    	callback(null, currentValue);
    }
+
 
 
 /**
