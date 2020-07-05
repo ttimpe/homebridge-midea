@@ -98,7 +98,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			};
 			const sign = this.getSign(url, form);
 			form.sign = sign;
-			this.log.debug('login request', qs.stringify(form));
+			//this.log.debug('login request', qs.stringify(form));
 			
 
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
@@ -120,7 +120,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 					const sign = this.getSign(url, form);
 					form.sign = sign;
-				this.log.debug('login request 2', qs.stringify(form));
+				//this.log.debug('login request 2', qs.stringify(form));
 
 					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
 						this.log.debug(response);
@@ -154,12 +154,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const url = "https://mapp.appsmb.com/v1/appliance/user/list/get";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
-			this.log.debug('getUserList request', qs.stringify(form));
 
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
-				this.log.debug(response);
 				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
-						this.log.debug('getUserList result is', response.data.result);
+					//	this.log.debug('getUserList result is', response.data.result);
 						response.data.result.list.forEach(async (currentElement: any) => {
 							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
 								const uuid = this.api.hap.uuid.generate(currentElement.id)
@@ -265,11 +263,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const sign = this.getSign(url, form);
 				form.sign = sign;
 
-			this.log.debug('sendCommand request', qs.stringify(form));
+			//this.log.debug('sendCommand request', qs.stringify(form));
 
 				axios.post(url, qs.stringify(form), this.axiosConfig).then( (response: any) => {
 						this.log.debug("send successful");
-						this.log.debug(response);
 						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
 						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
