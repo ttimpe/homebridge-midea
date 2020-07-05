@@ -57,8 +57,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Type': 'application/x-www-form-urlencoded' }
 		this.axiosConfig = {
-				headers: this.baseHeader
-				
+			headers: this.baseHeader
+
 		}
 		this.log = log;
 		this.config = config;
@@ -120,7 +120,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 					const sign = this.getSign(url, form);
 					form.sign = sign;
-				//this.log.debug('login request 2', qs.stringify(form));
+					//this.log.debug('login request 2', qs.stringify(form));
 
 					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
 						//this.log.debug(response);
@@ -132,7 +132,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						this.log.debug('Login request 2 failed with', err)
 						reject();
 					});
-				
+
 				}
 
 			}).catch((err:any) => {
@@ -158,49 +158,49 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
 				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
 					//	this.log.debug('getUserList result is', response.data.result);
-						response.data.result.list.forEach(async (currentElement: any) => {
-							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
-								const uuid = this.api.hap.uuid.generate(currentElement.id)
+					response.data.result.list.forEach(async (currentElement: any) => {
+						if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
+							const uuid = this.api.hap.uuid.generate(currentElement.id)
 
-								const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
+							const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
 
-								if (existingAccessory) {
-									this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-									existingAccessory.context.deviceId = currentElement.id
-									existingAccessory.context.deviceType = parseInt(currentElement.type)
-									existingAccessory.context.name = currentElement.name
-									this.api.updatePlatformAccessories([existingAccessory])
+							if (existingAccessory) {
+								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
+								existingAccessory.context.deviceId = currentElement.id
+								existingAccessory.context.deviceType = parseInt(currentElement.type)
+								existingAccessory.context.name = currentElement.name
+								this.api.updatePlatformAccessories([existingAccessory])
 
-									var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
-									this.mideaAccessories.push(ma)
-								} else {
-									this.log.debug('Adding new device:', currentElement.name)
-									const accessory = new this.api.platformAccessory(currentElement.name, uuid)
-									accessory.context.deviceId = currentElement.id
-									accessory.context.name = currentElement.name
-									accessory.context.deviceType = parseInt(currentElement.type)
-
-									var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
-									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
-
-									this.mideaAccessories.push(ma)
-								}
-								// this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+								this.mideaAccessories.push(ma)
 							} else {
-								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
-								this.log.warn('Please open an issue on GitHub with your specific device model')
-							}
+								this.log.debug('Adding new device:', currentElement.name)
+								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
+								accessory.context.deviceId = currentElement.id
+								accessory.context.name = currentElement.name
+								accessory.context.deviceType = parseInt(currentElement.type)
 
-						});
-					}
-					resolve();
+								var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+
+								this.mideaAccessories.push(ma)
+							}
+							// this.log.debug('mideaAccessories now contains', this.mideaAccessories)
+						} else {
+							this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
+							this.log.warn('Please open an issue on GitHub with your specific device model')
+						}
+
+					});
+				}
+				resolve();
 
 			}).catch((err: any) => {
 				this.log.debug('getUserList error', err);
 
 			});
 
-			});
+		});
 
 /*
 			request.post(
@@ -263,32 +263,32 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const sign = this.getSign(url, form);
 				form.sign = sign;
 
-			//this.log.debug('sendCommand request', qs.stringify(form));
+				//this.log.debug('sendCommand request', qs.stringify(form));
 
 				axios.post(url, qs.stringify(form), this.axiosConfig).then( (response: any) => {
-						this.log.debug("send successful");
-						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
-						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
+					this.log.debug("send successful");
+					const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
+					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
-						this.log.debug('target temperature', applianceResponse.targetTemperature);
+					this.log.debug('target temperature', applianceResponse.targetTemperature);
 
-						device.targetTemperature = applianceResponse.targetTemperature;
-						device.indoorTemperature = applianceResponse.indoorTemperature;
-						device.fanSpeed = applianceResponse.fanSpeed;
-						device.powerState = applianceResponse.powerState ? 1 : 0
-						device.swingMode = applianceResponse.swingMode;
-						device.operationalMode = applianceResponse.operationalMode;
-						device.humidty = applianceResponse.humidity
-						device.useFahrenheit = applianceResponse.tempUnit
-						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
-						this.log.debug('swingMode is set to', applianceResponse.swingMode);
-						this.log.debug('powerState is set to', applianceResponse.powerState);
-						this.log.debug('operational mode is set to', applianceResponse.operationalMode);
-						this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
+					device.targetTemperature = applianceResponse.targetTemperature;
+					device.indoorTemperature = applianceResponse.indoorTemperature;
+					device.fanSpeed = applianceResponse.fanSpeed;
+					device.powerState = applianceResponse.powerState ? 1 : 0
+					device.swingMode = applianceResponse.swingMode;
+					device.operationalMode = applianceResponse.operationalMode;
+					device.humidty = applianceResponse.humidity
+					device.useFahrenheit = applianceResponse.tempUnit
+					this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
+					this.log.debug('swingMode is set to', applianceResponse.swingMode);
+					this.log.debug('powerState is set to', applianceResponse.powerState);
+					this.log.debug('operational mode is set to', applianceResponse.operationalMode);
+					this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
 
-						this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
+					this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
 
-						resolve();
+					resolve();
 
 
 				}).catch((err: any) => {
@@ -297,7 +297,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 				});
 
-				});
+			});
 
 /*
 				(err: any, resp: any, body: any) => {
@@ -474,16 +474,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	}
 
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
-		let requestObject : object = {
-			applianceId: device.deviceId,
-			userId: device.userId
-		};
-		let data = this.encryptAesString(JSON.stringify(requestObject))
-
-		this.log.debug('encrypted string is', data);
-		this.log.debug(JSON.stringify(requestObject))
 		return new Promise((resolve, reject) => {
+			let requestObject : object = {
+				applianceId: device.deviceId,
+				userId: device.userId
+			};
+			let data = this.encryptAesString(JSON.stringify(requestObject))
 
+			this.log.debug('firmware req: encrypted string is', data);
+			this.log.debug(JSON.stringify(requestObject))
 			const form :any = {
 				appId: Constants.AppId,
 				data: data,
@@ -506,22 +505,22 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.log.debug('we are sending the following form', formQS)
 
 			axios.post(url, formQS, this.axiosConfig).then((response :any) => {
-					this.log.debug(response);
-					let decryptedString = this.decryptAesString(response.data.result.returnData)
-					this.log.debug('Got firmware response', decryptedString)
-					let responseObject = JSON.parse(decryptedString)
-					device.firmwareVersion = responseObject.result.version
-					this.log.debug('got firmware version', device.firmwareVersion)
+				this.log.debug(response);
+				let decryptedString = this.decryptAesString(response.data.result.returnData)
+				this.log.debug('Got firmware response', decryptedString)
+				let responseObject = JSON.parse(decryptedString)
+				device.firmwareVersion = responseObject.result.version
+				this.log.debug('got firmware version', device.firmwareVersion)
 
-					resolve();
+				resolve();
 			}).catch((err:any) => {
 				this.log.debug('Failed get firmware', err);
-					reject();
+				reject();
 			});
 
 			
-		
-	
+
+
 		});
 	}
 
