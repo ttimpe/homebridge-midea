@@ -476,8 +476,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	getFirmwareVersionOfDevice(device: MideaAccessory) {
 		return new Promise((resolve, reject) => {
 			let requestObject : object = {
-				applianceId: device.deviceId,
-				userId: device.userId
+				applianceId: device.deviceId
 			};
 			let json = JSON.stringify(requestObject);
 			json = json.split(',').join(', ');
