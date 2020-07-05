@@ -499,7 +499,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 			form.sign = sign;
 			let formQS = qs.stringify(form);
-			formQS = formQS.replaceAll('%2F', '/');
+			formQS = formQS.split('%2f').join('/');
 
 
 			this.log.debug('we are sending the following form', formQS)
