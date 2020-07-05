@@ -135,12 +135,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						this.generateDataKey();
 						resolve();
 					}). catch((err :any) => {
+						this.log.debug('Login request 2 failed with', err)
 						reject();
 					});
 				
 				}
 
 			}).catch((err:any) => {
+				this.log.debug('Login request failed with', err);
 				reject();
 			});
 		});
@@ -202,7 +204,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					resolve();
 
 			}).catch((err: any) => {
-
+				this.log.debug('getUserList error', err);
 
 			});
 
@@ -299,6 +301,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 				}).catch((err: any) => {
+					this.log.debug('sendCommand request failed', err);
 					reject();
 
 				});
@@ -519,6 +522,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 					resolve();
 			}).catch((err:any) => {
+				this.log.debug('Failed get firmware', err);
 					reject();
 			});
 
