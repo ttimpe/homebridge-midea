@@ -77,7 +77,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.updateValues();
 			}, this.config['interval'] * 60 * 1000);
 		}).catch(() => {
-			this.log.debug("Login failed");
+			this.log.debug("0");
 		});
 	}
 	login() {
@@ -95,10 +95,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			};
 			const sign = this.getSign(url, form);
 			form.sign = sign;
-
+			this.log.debug('login request', qs.stringify(form));
 			
 
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+				this.log.debug(response);
 				if (response.data) {
 					const loginId :string = response.data.result.loginId;
 					const password : string = this.getSignPassword(loginId);
@@ -116,8 +117,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 					const sign = this.getSign(url, form);
 					form.sign = sign;
+				this.log.debug('login request 2', qs.stringify(form));
 
 					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+						this.log.debug(response);
 						this.atoken = response.data.result.accessToken;
 						this.sessionId = response.data.result.sessionId;
 						this.generateDataKey();
@@ -146,8 +149,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const url = "https://mapp.appsmb.com/v1/appliance/user/list/get";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
+			this.log.debug('getUserList request', qs.stringify(form));
 
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+				this.log.debug(response);
 				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
 						this.log.debug('getUserList result is', response.data.result);
 						response.data.result.list.forEach(async (currentElement: any) => {
@@ -255,10 +260,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const sign = this.getSign(url, form);
 				form.sign = sign;
 
+			this.log.debug('sendCommand request', qs.stringify(form));
 
 				axios.post(url, qs.stringify(form), this.axiosConfig).then( (response: any) => {
 						this.log.debug("send successful");
-
+						this.log.debug(response);
 						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
 						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
@@ -490,11 +496,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
+			this.log.debug('firmware request', qs.stringify(form));
 
 			this.log.debug('we are sending the following form', form)
 
 			axios.post(url, qs.stringify(form), this.axiosConfig).then((response :any) => {
-
+					this.log.debug(response);
 					let decryptedString = this.decryptAesString(response.data.result.returnData)
 					this.log.debug('Got firmware response', decryptedString)
 					let responseObject = JSON.parse(decryptedString)
