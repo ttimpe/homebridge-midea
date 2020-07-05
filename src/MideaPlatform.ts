@@ -6,6 +6,12 @@ const request = require("request");
 const traverse = require("traverse");
 const crypto = require("crypto");
 
+const axios = require('axios').default;
+const axiosCookieJarSupport =  require('axios-cookie-jar-support').default;
+const tough = require('tough');
+
+const qs = require('querystring');
+
 import Utils from './Utils'
 import Constants from './Constants'
 import ApplianceResponse from './ApplianceResponse'
@@ -32,6 +38,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	sessionId: string = ''
 	dataKey : string = ''
 	baseHeader : object
+	axiosConfig : any;
 	public readonly accessories: PlatformAccessory[] = [];
 	mideaAccessories : MideaAccessory[] = []
 
@@ -41,11 +48,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
 
-		this.jar = request.jar();
+		axiosCookieJarSupport(axios);
+		this.jar = new tough.CookieJar()
 
 
 
-		this.baseHeader = { 'User-Agent': Constants.UserAgent }
+		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Ty<pe': 'application/x-www-form-urlencoded' }
+		this.axiosConfig = {
+				headers: this.baseHeader
+		}
 		this.log = log;
 		this.config = config;
 		api.on('didFinishLaunching', () => {
@@ -71,7 +82,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	}
 	login() {
 		return new Promise((resolve, reject) => {
-			this.jar = request.jar();
 			const url = "https://mapp.appsmb.com/v1/user/login/id/get";
 
 			const form : any = {
@@ -86,34 +96,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const sign = this.getSign(url, form);
 			form.sign = sign;
 
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				json: true,
-				form: form,
-				jar: this.jar,
-				gzip: true
-			},
-			(err :any, resp :any, body :any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to login");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject();
-					return;
-				}
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					this.log.debug(body.msg);
-					this.log.debug(body.errorCode);
-					reject();
-					return;
-				}
-				if (body.result) {
-					const loginId :string = body.result.loginId;
+			
+
+			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+				if (response.data) {
+					const loginId :string = response.data.result.loginId;
 					const password : string = this.getSignPassword(loginId);
 					const url = "https://mapp.appsmb.com/v1/user/login";
 					const form :any = {
@@ -130,42 +117,19 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					const sign = this.getSign(url, form);
 					form.sign = sign;
 
-					request.post(
-					{
-						url: url,
-						headers: this.baseHeader,
-						followAllRedirects: true,
-						json: true,
-						form: form,
-						jar: this.jar,
-						gzip: true,
-					},
-
-					(err: any, resp: any, body: any) => {
-						if (err || (resp && resp.statusCode >= 400) || !body) {
-							this.log.debug("Failed to login");
-							err && this.log.debug(err);
-							body && this.log.debug(JSON.stringify(body));
-							resp && this.log.debug(resp.statusCode);
-							reject();
-							return;
-						}
-
-						this.log.debug(JSON.stringify(body));
-						if (body.errorCode && body.errorCode !== "0") {
-							this.log.debug(body.msg);
-							this.log.debug(body.errorCode);
-							reject();
-							return;
-						}
-						if (body.result) {
-							this.atoken = body.result.accessToken;
-							this.sessionId = body.result.sessionId;
-							this.generateDataKey();
-							resolve();
-						}
+					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+						this.atoken = response.data.result.accessToken;
+						this.sessionId = response.data.result.sessionId;
+						this.generateDataKey();
+						resolve();
+					}). catch((err :any) => {
+						reject();
 					});
+				
 				}
+
+			}).catch((err:any) => {
+				reject();
 			});
 		});
 	}
@@ -182,37 +146,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const url = "https://mapp.appsmb.com/v1/appliance/user/list/get";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				json: true,
-				form: form,
-				jar: this.jar,
-				gzip: true,
-			},
-			(err: any, resp: any, body: any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to login");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject();
-					return;
-				}
 
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					this.log.debug(body.msg);
-					this.log.debug(body.errorCode);
-					reject();
-					return;
-				}
-				try {
-					if (body.result && body.result.list && body.result.list.length > 0) {
-						this.log.debug('getUserList result is', body.result);
-						body.result.list.forEach(async (currentElement: any) => {
+			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
+						this.log.debug('getUserList result is', response.data.result);
+						response.data.result.list.forEach(async (currentElement: any) => {
 							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
 								const uuid = this.api.hap.uuid.generate(currentElement.id)
 
@@ -248,6 +186,44 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						});
 					}
 					resolve();
+
+			}).catch((err: any) => {
+
+
+			});
+
+			});
+
+/*
+			request.post(
+			{
+				url: url,
+				headers: this.baseHeader,
+				followAllRedirects: true,
+				json: true,
+				form: form,
+				jar: this.jar,
+				gzip: true,
+			},
+			(err: any, resp: any, body: any) => {
+				if (err || (resp && resp.statusCode >= 400) || !body) {
+					this.log.debug("Failed to login");
+					err && this.log.debug(err);
+					body && this.log.debug(JSON.stringify(body));
+					resp && this.log.debug(resp.statusCode);
+					reject();
+					return;
+				}
+
+				this.log.debug(JSON.stringify(body));
+				if (body.errorCode && body.errorCode !== "0") {
+					this.log.debug(body.msg);
+					this.log.debug(body.errorCode);
+					reject();
+					return;
+				}
+				try {
+					
 				} catch (error) {
 					this.log.debug(error);
 					this.log.debug(error.stack);
@@ -256,9 +232,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}
 			);
 		});
+		*/
+
 	}
-	sendCommand(device
-		: MideaAccessory, order: any) {
+	sendCommand(device: MideaAccessory, order: any) {
 		if (device) {
 			return new Promise((resolve, reject) => {
 				const orderEncode = Utils.encode(order);
@@ -277,16 +254,43 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const url = "https://mapp.appsmb.com/v1/appliance/transparent/send";
 				const sign = this.getSign(url, form);
 				form.sign = sign;
-				request.post(
-				{
-					url: url,
-					headers: this.baseHeader,
-					followAllRedirects: true,
-					json: true,
-					form: form,
-					jar: this.jar,
-					gzip: true,
-				},
+
+
+				axios.post(url, qs.stringify(form), this.axiosConfig).then( (response: any) => {
+						this.log.debug("send successful");
+
+						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
+						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
+
+						this.log.debug('target temperature', applianceResponse.targetTemperature);
+
+						device.targetTemperature = applianceResponse.targetTemperature;
+						device.indoorTemperature = applianceResponse.indoorTemperature;
+						device.fanSpeed = applianceResponse.fanSpeed;
+						device.powerState = applianceResponse.powerState ? 1 : 0
+						device.swingMode = applianceResponse.swingMode;
+						device.operationalMode = applianceResponse.operationalMode;
+						device.humidty = applianceResponse.humidity
+						device.useFahrenheit = applianceResponse.tempUnit
+						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
+						this.log.debug('swingMode is set to', applianceResponse.swingMode);
+						this.log.debug('powerState is set to', applianceResponse.powerState);
+						this.log.debug('operational mode is set to', applianceResponse.operationalMode);
+						this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
+
+						this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
+
+						resolve();
+
+
+				}).catch((err: any) => {
+					reject();
+
+				});
+
+				});
+
+/*
 				(err: any, resp: any, body: any) => {
 					if (err || (resp && resp.statusCode >= 400) || !body) {
 						this.log.debug("Failed to send command");
@@ -318,30 +322,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						return;
 					}
 					try {
-						this.log.debug("send successful");
-
-						const response :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
-						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-
-						this.log.debug('target temperature', response.targetTemperature);
-
-						device.targetTemperature = response.targetTemperature;
-						device.indoorTemperature = response.indoorTemperature;
-						device.fanSpeed = response.fanSpeed;
-						device.powerState = response.powerState ? 1 : 0
-						device.swingMode = response.swingMode;
-						device.operationalMode = response.operationalMode;
-						device.humidty = response.humidity
-						device.useFahrenheit = response.tempUnit
-						this.log.debug('fanSpeed is set to', response.fanSpeed);
-						this.log.debug('swingMode is set to', response.swingMode);
-						this.log.debug('powerState is set to', response.powerState);
-						this.log.debug('operational mode is set to', response.operationalMode);
-						this.log.debug('useFahrenheit is set to', response.tempUnit)
-
-						this.log.debug('Full data is', Utils.formatResponse(response.data))
-
-						resolve();
+						
 					} catch (error) {
 						this.log.debug(body);
 						this.log.debug(error);
@@ -352,6 +333,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				}
 				);
 			});
+			*/
 		} else {
 			this.log.debug('No device specified')
 		}
@@ -510,80 +492,23 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			form.sign = sign;
 
 			this.log.debug('we are sending the following form', form)
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				form: form,
-				jar: this.jar,
-				gzip: true,
-				json: true
 
-			}, (err: any, resp: any, body: any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to send command");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject(err);
-					return;
-				}
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					if (body.errorCode == MideaErrorCodes.DeviceUnreachable) {
-						this.log.debug("Cannot reach " + device.deviceId + " " + body.msg);
-						resolve();
-						return;
-					}
-					if (body.errorCode == MideaErrorCodes.CommandNotAccepted) {
-						this.log.debug("Command was not accepted by device. Command wrong or device not reachable " + device.deviceId + " " + body.msg);
-						resolve();
-						return;
-					}
-					this.log.debug("Sending failed device returns an error");
-					this.log.debug(body.errorCode);
-					this.log.debug(body.msg);
-					reject(body.msg);
-					return;
-				}
-				try {
+			axios.post(url, qs.stringify(form), this.axiosConfig).then((response :any) => {
 
-					let decryptedString = this.decryptAesString(body.result.returnData)
+					let decryptedString = this.decryptAesString(response.data.result.returnData)
 					this.log.debug('Got firmware response', decryptedString)
 					let responseObject = JSON.parse(decryptedString)
 					device.firmwareVersion = responseObject.result.version
 					this.log.debug('got firmware version', device.firmwareVersion)
 
-					
-				/*
-					this.log.debug("send successful");
-					const response :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
-					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-					this.log.debug('target temperature', response.targetTemperature);
-
-					device.targetTemperature = response.targetTemperature;
-					device.indoorTemperature = response.indoorTemperature;
-					device.fanSpeed = response.fanSpeed;
-					device.powerState = response.powerState ? 1 : 0
-					device.swingMode = response.swingMode;
-					device.operationalMode = response.operationalMode;
-					device.humidty = response.humidity
-					device.useFahrenheit = response.tempUnit
-					this.log.debug('fanSpeed is set to', response.fanSpeed);
-					this.log.debug('swingMode is set to', response.swingMode);
-					this.log.debug('powerState is set to', response.powerState);
-					this.log.debug('operational mode is set to', response.operationalMode);
-					*/
 					resolve();
-				} catch (error) {
-					this.log.debug(body);
-					this.log.debug(error);
-					this.log.debug(error.stack);
+			}).catch((err:any) => {
 					reject();
-				}
-			}
-			);
+			});
+
+			
+		
+	
 		});
 	}
 
