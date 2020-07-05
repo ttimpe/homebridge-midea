@@ -7,7 +7,7 @@ const traverse = require("traverse");
 const crypto = require("crypto");
 
 const axios = require('axios').default;
-const axiosCookieJarSupport =  require('axios-cookie-jar-support').default;
+const axiosCookieJarSupport =  require('axios-cookiejar-support').default;
 const tough = require('tough');
 
 const qs = require('querystring');
