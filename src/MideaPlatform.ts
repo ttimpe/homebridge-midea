@@ -55,7 +55,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 
-		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Ty<pe': 'application/x-www-form-urlencoded' }
+		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Type': 'application/x-www-form-urlencoded' }
 		this.axiosConfig = {
 				headers: this.baseHeader
 				
