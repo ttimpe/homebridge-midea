@@ -123,7 +123,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				//this.log.debug('login request 2', qs.stringify(form));
 
 					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
-						this.log.debug(response);
+						//this.log.debug(response);
 						this.atoken = response.data.result.accessToken;
 						this.sessionId = response.data.result.sessionId;
 						this.generateDataKey();
