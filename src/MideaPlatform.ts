@@ -499,11 +499,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
-			this.log.debug('firmware request', qs.stringify(form));
+			this.log.debug('firmware request', qs.stringify(form, { encode: false }));
 
 			this.log.debug('we are sending the following form', form)
 
-			axios.post(url, qs.stringify(form), this.axiosConfig).then((response :any) => {
+			axios.post(url, qs.stringify(form, { encode: false }), this.axiosConfig).then((response :any) => {
 					this.log.debug(response);
 					let decryptedString = this.decryptAesString(response.data.result.returnData)
 					this.log.debug('Got firmware response', decryptedString)
