@@ -21,8 +21,8 @@ import SetCommand from './SetCommand'
 import PacketBuilder from './PacketBuilder'
 
 import { MideaAccessory } from './MideaAccessory'
-import { MideaDeviceType } from './MideaDeviceType'
-import { MideaErrorCodes } from './MideaErrorCodes' 
+import { MideaDeviceType } from './enums/MideaDeviceType'
+import { MideaErrorCodes } from './enums/MideaErrorCodes' 
 
 
 
@@ -280,11 +280,13 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					device.operationalMode = applianceResponse.operationalMode;
 					device.humidty = applianceResponse.humidity
 					device.useFahrenheit = applianceResponse.tempUnit
+					device.ecoMode = applianceResponse.ecoMode
 					this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
 					this.log.debug('swingMode is set to', applianceResponse.swingMode);
 					this.log.debug('powerState is set to', applianceResponse.powerState);
 					this.log.debug('operational mode is set to', applianceResponse.operationalMode);
 					this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
+					this.log.debug('ecoMode is set to', applianceResponse.ecoMode)
 
 					this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
 
@@ -537,6 +539,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			command.fanSpeed = device.fanSpeed;
 			command.operationalMode = device.operationalMode
 			command.useFahrenheit = device.useFahrenheit
+			command.ecoMode = device.ecoMode
 			//operational mode for workaround with fan only mode on device
 			const pktBuilder = new PacketBuilder();
 			pktBuilder.command = command;

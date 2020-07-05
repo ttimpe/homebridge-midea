@@ -16,7 +16,9 @@ Add this to the platforms array in your config.json:
 	    	{
 	    		"deviceId": "DEVICE_ID"
 	    		"supportedSwingMode": "Vertical",
-				"temperatureSteps": 1
+				"temperatureSteps": 1,
+				"fanOnlyMode": true,
+				"fanOnlyModeName": "Fan Only Mode"
 	    	}
 	    ]
 	}
@@ -35,6 +37,9 @@ You have to select which type your device supports
 
 Temperature steps that the device supports. Default is 0.5
 
+### fanOnlyMode & fanOnlyModeName
+
+This allows you to enable a fan-only mode service
 
 
 ## Usage

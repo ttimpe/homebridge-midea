@@ -1,3 +1,6 @@
+import { MideaSwingMode } from './enums/MideaSwingMode'
+import { MideaOperationalMode } from './enums/MideaOperationalMode';
+
 export default class ApplianceResponse {
     data: any;
     constructor(data :any) {
@@ -27,7 +30,7 @@ export default class ApplianceResponse {
         return (this.data[0x02] & 0xf) + 16;
     }
 
-    get operationalMode() : number {
+    get operationalMode() : MideaOperationalMode {
         return (this.data[0x02] & 0xe0) >> 5;
     }
 
@@ -59,7 +62,7 @@ export default class ApplianceResponse {
     }
 
     // Byte 0x07
-    get swingMode() : any {
+    get swingMode() : MideaSwingMode {
         return this.data[0x07] & 0x0f;
     }
 

@@ -1,5 +1,8 @@
 import BaseCommand from './BaseCommand';
-import { MideaDeviceType } from './MideaDeviceType'
+import { MideaDeviceType } from './enums/MideaDeviceType'
+import { MideaOperationalMode } from './enums/MideaOperationalMode'
+import { MideaSwingMode } from './enums/MideaSwingMode'
+
 export default class SetCommand extends BaseCommand {
     constructor(device_type: MideaDeviceType = MideaDeviceType.AirConditioner) {
         super(device_type);
@@ -39,7 +42,7 @@ export default class SetCommand extends BaseCommand {
         return (this.data[0x0c] & 0xe0) >> 5;
     }
 
-    set operationalMode(mode : number) {
+    set operationalMode(mode : MideaOperationalMode) {
         this.data[0x0c] &= ~0xe0; // Clear the mode bit
         this.data[0x0c] |= (mode << 5) & 0xe0;
     }
@@ -64,7 +67,7 @@ export default class SetCommand extends BaseCommand {
         return this.data[0x11];
     }
 
-    set swingMode(mode) {
+    set swingMode(mode: MideaSwingMode) {
         this.data[0x11] &= ~0x0f; // Clear the mode bit
         this.data[0x11] |= mode & 0x0f;
     }

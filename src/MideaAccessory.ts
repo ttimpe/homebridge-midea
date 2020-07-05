@@ -1,7 +1,9 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
 import { MideaPlatform } from './MideaPlatform'
-import { MideaDeviceType } from './MideaDeviceType'
-import { MideaSwingMode } from './MideaSwingMode'
+import { MideaDeviceType } from './enums/MideaDeviceType'
+import { MideaSwingMode } from './enums/MideaSwingMode'
+import { MideaOperationalMode } from './enums/MideaOperationalMode'
+
 export class MideaAccessory {
 
 	
@@ -11,22 +13,25 @@ export class MideaAccessory {
 	public targetTemperature : number = 0
 	public indoorTemperature: number = 0
 	public useFahrenheit: boolean = false
+
 	public fanSpeed: number = 0
 	public fanOnlyMode : boolean = false
 	public fanOnlyModeName : string = ''
 	public temperatureSteps: number = 0.5
 	public powerState : any
 	public supportedSwingMode : MideaSwingMode = MideaSwingMode.None
-	public operationalMode : number = 0
+	public operationalMode : number = MideaOperationalMode.Off
 	public swingMode :number = 0
+	public ecoMode :boolean = false
 	public name: string = ''
 	public humidty: number = 0
 	public userId: string = ''
 	public firmwareVersion: string = '0.0'
 
 
-	private service!: Service
 
+	private service!: Service
+	private fanService!: Service
 
 	constructor(
 		private readonly platform: MideaPlatform,
@@ -89,6 +94,12 @@ export class MideaAccessory {
 			break
 			case MideaDeviceType.AirConditioner: {
 				this.service = this.accessory.getService(this.platform.Service.HeaterCooler) || this.accessory.addService(this.platform.Service.HeaterCooler)
+
+				if (this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'fanOnlyMode') == true) {
+					this.fanService = this.accessory.getService(this.platform.Service.Fanv2) || this.accessory.addService(this.platform.Service.Fanv2);
+					this.fanService.setCharacteristic(this.platform.Characteristic.Name, this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'fanOnlyModeName') || 'Fan');
+
+				}
 			}
 			break
 			default: {
@@ -162,6 +173,13 @@ export class MideaAccessory {
 				this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
 				.on('get', this.handleRotationSpeedGet.bind(this))
 				.on('set', this.handleRotationSpeedSet.bind(this));
+
+				if (this.fanService != undefined) {
+						  // for fan only mode
+      				this.fanService.getCharacteristic(this.platform.Characteristic.Active)
+      				.on('get', this.handleFanActiveGet.bind(this))
+      				.on('set', this.handleFanActiveSet.bind(this));
+				}
 
 			}
 			break
@@ -415,7 +433,7 @@ export class MideaAccessory {
 		// workaround to get the "fan only mode" from device
 		// device operation values are 1.0="Auto",2.0="Cool",3.0="Dry",4.0="Heat",5.0="Fan"
 		// set this to a valid value for Active
-		if (this.operationalMode == 5) {
+		if (this.operationalMode == MideaOperationalMode.FanOnly) {
 			callback(null, this.platform.Characteristic.Active.ACTIVE);
 		} else {
 			callback(null, this.platform.Characteristic.Active.INACTIVE);
@@ -425,12 +443,12 @@ export class MideaAccessory {
 	/**
 	* Handle requests to set the "On" characteristic
 	*/
-	handleFanActiveSet(value: number, callback: CharacteristicSetCallback) {
+	handleFanActiveSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 		this.platform.log.debug('Triggered SET Fan:', value);
 		// workaround to get the "fan only mode" from device
 		// device operation values are 1.0="Auto",2.0="Cool",3.0="Dry",4.0="Heat",5.0="Fan"
 		if (value == this.platform.Characteristic.Active.ACTIVE) {
-			this.operationalMode = 5;	
+			this.operationalMode = MideaOperationalMode.FanOnly;	
 		}
 
 		else {
@@ -449,8 +467,9 @@ export class MideaAccessory {
 						//			}
 						//			set default to mode "2" if it is off
 						//			else {
-							//				this.operationalMode = 2;
 							//			}
+							this.operationalMode = MideaOperationalMode.Cooling;
+
 						}
 						this.platform.sendUpdateToDevice(this);
 						callback(null, value);
