@@ -57,14 +57,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Ty<pe': 'application/x-www-form-urlencoded' }
 		this.axiosConfig = {
-				headers: this.baseHeader,
-				httpsAgent: new https.Agent({  
-    				rejectUnauthorized: false
-  				}),
-  				proxy: {
-  					host: '192.168.1.252',
-  					port: 8080
-  				}
+				headers: this.baseHeader
+				
 		}
 		this.log = log;
 		this.config = config;
