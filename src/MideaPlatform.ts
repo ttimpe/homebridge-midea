@@ -5,6 +5,8 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 const request = require("request");
 const traverse = require("traverse");
 const crypto = require("crypto");
+const https = require('https');
+
 
 const axios = require('axios').default;
 const axiosCookieJarSupport =  require('axios-cookiejar-support').default;
@@ -55,7 +57,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Ty<pe': 'application/x-www-form-urlencoded' }
 		this.axiosConfig = {
-				headers: this.baseHeader
+				headers: this.baseHeader,
+				httpsAgent: new https.Agent({  
+    				rejectUnauthorized: false
+  				}),
+  				proxy: {
+  					host: '192.168.1.252',
+  					port: 8080
+  				}
 		}
 		this.log = log;
 		this.config = config;
