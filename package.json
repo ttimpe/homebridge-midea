@@ -23,11 +23,9 @@
   "author": "ttimpe",
   "license": "MIT",
   "dependencies": {
-    "@types/tough-cookie": "^4.0.0",
     "axios": "^0.19.2",
     "axios-cookiejar-support": "^1.0.0",
     "querystring": "^0.2.0",
-    "request": "^2.88.2",
     "tough-cookie": "^4.0.0",
     "traverse": "^0.6.6"
   },
@@ -43,7 +41,8 @@
     "@types/node": "^14.0.13",
     "homebridge": "^1.1.0",
     "typescript": "^3.9.5",
-    "ts-node": "^8.10.2"
+    "ts-node": "^8.10.2",
+    "@types/tough-cookie": "^4.0.0"
   },
   "scripts": {
     "build": "tsc"
