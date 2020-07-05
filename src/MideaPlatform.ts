@@ -479,10 +479,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				applianceId: device.deviceId,
 				userId: device.userId
 			};
-			let data = this.encryptAesString(JSON.stringify(requestObject))
+			let json = JSON.stringify(requestObject);
+			json = json.split(',').join(', ');
+			this.log.debug('sending json', json);
+			let data = this.encryptAesString(json);
 
 			this.log.debug('firmware req: encrypted string is', data);
-			this.log.debug(JSON.stringify(requestObject))
 			const form :any = {
 				appId: Constants.AppId,
 				data: data,
