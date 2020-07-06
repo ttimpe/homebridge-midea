@@ -176,7 +176,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug('getUserList result is', response);
 
 				if (response.data.errorCode && response.data.errorCode != '0') {
-					this.log.debug('getUserList returned error', response.msg);
+					this.log.error('getUserList returned error', response.data.msg);
 					reject();
 				} else {
 					if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
@@ -214,7 +214,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						resolve();
 
 					} else {
-						this.log.debug('getUserList invalid response');
+						this.log.error('getUserList invalid response');
 						reject();
 					}
 				}
@@ -253,7 +253,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					const response = this.apiClient.post(url, qs.stringify(form))
 
 					if (response.data.errorCode && response.data.errorCode != '0') {
-						this.log.debug('sendCommand returned error', response.data.msg)
+						this.log.error('sendCommand returned error', response.data.msg)
 						reject();
 					} else {
 
@@ -285,12 +285,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					}
 
 				} catch(err) {
-					this.log.debug('sendCommand request failed', err);
+					this.log.error('sendCommand request failed', err);
 					reject();
 
 				}
 			} else {
-				this.log.debug('No device specified');
+				this.log.error('No device specified');
 				reject();
 			}
 		});
@@ -312,7 +312,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.log.debug(JSON.stringify(this.mideaAccessories))
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory === undefined) {
-				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
+				this.log.warn('Could not find accessory with id', accessory.context.deviceId)
 			} else {
 				try {
 					const response = await this.sendCommand(mideaAccessory, data)
@@ -327,10 +327,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						try {
 							const commandResponse = await this.sendCommand(mideaAccessory, data)
 						} catch (err) {
-							this.log.debug("update Command still failed after relogin");
+							this.log.warn("update Command still failed after relogin");
 						}
 					} catch (err) {
-						this.log.debug("Login failed");
+						this.log.warn("Login failed");
 					}
 
 				}
@@ -387,7 +387,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 				resolve();
 			} catch(err) {
-				this.log.debug('Failed get firmware', err);
+				this.log.warn('Failed get firmware', err);
 				reject();
 			}
 
@@ -419,18 +419,18 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug('Sent update to device '+ device.name)
 			} catch (err) {
 				this.log.debug(err);
-				this.log.debug("Trying to relogin");
+				this.log.warn("Trying to relogin");
 				try {
 					const loginResponse = await this.login()
 					this.log.debug("Login successful");
 					try {
 						await this.sendCommand(device, data)
 					} catch (err) {
-						this.log.debug("Command still failed after relogin");
+						this.log.error("Command still failed after relogin");
 
 					}
 				} catch(err) {
-					this.log.debug("Login failed");
+					this.log.error("Login failed");
 				}
 			}
 			//after sending, update because sometimes the api hangs
