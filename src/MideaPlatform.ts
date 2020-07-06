@@ -59,7 +59,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			headers: {
 				'User-Agent': Constants.UserAgent,
 				'Content-Type': 'application/x-www-form-urlencoded'
-			}
+			},
+			jar: this.jar
 		})
 		this.log = log;
 		this.config = config;
