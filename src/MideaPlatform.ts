@@ -2,7 +2,6 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { AxiosError } from 'axios';
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
-const request = require("request");
 const traverse = require("traverse");
 const crypto = require("crypto");
 const https = require('https');
@@ -44,9 +43,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	public readonly accessories: PlatformAccessory[] = [];
 	mideaAccessories : MideaAccessory[] = []
 
-	// service: any
-	//  fanService: any
-	// informationService : any
+
 
 	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
 
@@ -93,7 +90,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	}
 	async login() {
 		return new Promise(async (resolve, reject) => {
-			const url = "/user/login/id/get";
+			const url = '/user/login/id/get';
 
 			const form : any = {
 				loginAccount: this.config['user'],
@@ -104,7 +101,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp(),
 				language: Constants.Language
 			};
-			const sign = this.getSign(url, form);
+			const sign = Utils.getSign(url, form);
 			form.sign = sign;
 			//this.log.debug('login request', qs.stringify(form));
 			
@@ -114,7 +111,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug(response);
 				if (response.data) {
 					const loginId :string = response.data.result.loginId;
-					const password : string = this.getSignPassword(loginId);
+					const password : string = Utils.getSignPassword(loginId, this.config.password);
 					const url = "/user/login";
 					const form :any = {
 						loginAccount: this.config['user'],
@@ -127,7 +124,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						appId: Constants.AppId,
 					};
 
-					const sign = this.getSign(url, form);
+					const sign = Utils.getSign(url, form);
 					form.sign = sign;
 					//this.log.debug('login request 2', qs.stringify(form));
 					try {
@@ -136,7 +133,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						//this.log.debug(response);
 						this.atoken = loginResponse.data.result.accessToken;
 						this.sessionId = loginResponse.data.result.sessionId;
-						this.generateDataKey();
+						this.dataKey = Utils.generateDataKey(this.atoken);
 						resolve();
 					} catch (err) {
 						this.log.debug('Login request 2 failed with', err)
@@ -163,7 +160,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				sessionId: this.sessionId
 			};
 			const url = "/user/list/get";
-			const sign = this.getSign(url, form);
+			const sign = Utils.getSign(url, form);
 			form.sign = sign;
 			try {
 				const response = await this.apiClient.post(url, qs.stringify(form))
@@ -260,7 +257,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 				const orderEncode = Utils.encode(order);
-				const orderEncrypt = this.encryptAes(orderEncode);
+				const orderEncrypt = Utils.encryptAes(orderEncode, this.dataKey);
 
 				const form :any = {
 					applianceId: device.deviceId,
@@ -273,14 +270,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					sessionId: this.sessionId,
 				};
 				const url = "/appliance/transparent/send";
-				const sign = this.getSign(url, form);
+				const sign = Utils.getSign(url, form);
 				form.sign = sign;
 
 				//this.log.debug('sendCommand request', qs.stringify(form));
 				try {
 					const response = this.apiClient.post(url, qs.stringify(form))
 					this.log.debug("send successful");
-					const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
+					const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
 					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
 					this.log.debug('target temperature', applianceResponse.targetTemperature);
@@ -363,78 +360,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			*/
 	
 	}
-	getSign(path: string, form: any) {
-		let postfix = "/v1" + path;
-		// Maybe this will help, should remove any query string parameters in the URL from the sign
-		this.log.debug('signing url', postfix)
-		const ordered : any = {};
-		Object.keys(form)
-		.sort()
-		.forEach(function (key: any) {
-			ordered[key] = form[key];
-		});
-		const query = Object.keys(ordered)
-		.map((key) => key + "=" + ordered[key])
-		.join("&");
-
-		return crypto
-		.createHash("sha256")
-		.update(postfix + query + Constants.AppKey)
-		.digest("hex");
-	}
-	getSignPassword(loginId: string) {
-		const pw = crypto.createHash("sha256").update(this.config.password).digest("hex");
-
-		return crypto
-		.createHash("sha256")
-		.update(loginId + pw + Constants.AppKey)
-		.digest("hex");
-	}
+	
 
 
-	generateDataKey() {
-		const md5AppKey = crypto.createHash("md5").update(Constants.AppKey).digest("hex");
-		const decipher = crypto.createDecipheriv("aes-128-ecb", md5AppKey.slice(0, 16), "");
-		const dec = decipher.update(this.atoken, "hex", "utf8");
-		this.dataKey = dec;
-		return dec;
-	}
-	decryptAes(reply: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const decipher = crypto.createDecipheriv("aes-128-ecb", this.dataKey, "");
-		const dec = decipher.update(reply, "hex", "utf8");
-		return dec.split(",");
-	}
-	decryptAesString(reply: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const decipher = crypto.createDecipheriv("aes-128-ecb", this.dataKey, "");
-		const dec = decipher.update(reply, "hex", "utf8");
-		return dec;
-	}
-
-
-	encryptAes(query: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query.join(","), "utf8", "hex");
-		ciph += cipher.final("hex");
-		return ciph;
-	}
-	encryptAesString(query: string) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query, "utf8", "hex");
-		ciph += cipher.final("hex");
-		return ciph;
-	}
 
 	updateValues() {
 		const header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
@@ -449,7 +377,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory === undefined) {
 				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
-				
 			} else {
 				try {
 					const response = await this.sendCommand(mideaAccessory, data)
@@ -485,7 +412,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			let json = JSON.stringify(requestObject);
 			json = json.split(',').join(', ');
 			this.log.debug('sending json', json);
-			let data = this.encryptAesString(json);
+			let data = Utils.encryptAesString(json, this.dataKey);
 
 			this.log.debug('firmware req: encrypted string is', data);
 			const form :any = {
@@ -500,7 +427,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp()
 			};
 			const url = "/app2base/data/transmit?serviceUrl=/ota/version";
-			const sign = this.getSign(url, form);
+			const sign = Utils.getSign(url, form);
 
 			form.sign = sign;
 			let formQS = qs.stringify(form);
@@ -515,7 +442,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const response = await this.apiClient.post(url, goodString)
 
 				this.log.debug(response.data);
-				let decryptedString = this.decryptAesString(response.data.result.returnData)
+				let decryptedString = Utils.decryptAesString(response.data.result.returnData, this.dataKey)
 				this.log.debug('Got firmware response', decryptedString)
 				let responseObject = JSON.parse(decryptedString)
 				device.firmwareVersion = responseObject.result.version
@@ -551,10 +478,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.log.debug("Command: " + JSON.stringify(command));
 			this.log.debug("Command + Header: " + JSON.stringify(data));
 			try {
-			const response = await this.sendCommand(device, data)
+				const response = await this.sendCommand(device, data)
+				this.log.debug('Sent update to device '+ device.name)
 			} catch (err) {
 				this.log.debug(err);
-				this.log.debug("Try to relogin");
+				this.log.debug("Trying to relogin");
 				try {
 					const loginResponse = await this.login()
 					this.log.debug("Login successful");
