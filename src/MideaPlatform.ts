@@ -55,7 +55,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		const agent = tunnel.httpsOverHttp({
 			proxy: {
-				host: 'http://192.168.1.252',
+				host: '192.168.1.252',
 				port: 8080
 			}
 		})

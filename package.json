@@ -28,7 +28,8 @@
     "node-tunnel": "^4.0.0",
     "querystring": "^0.2.0",
     "tough-cookie": "^4.0.0",
-    "traverse": "^0.6.6"
+    "traverse": "^0.6.6",
+    "tunnel": "0.0.6"
   },
   "keywords": [
     "homebridge",
