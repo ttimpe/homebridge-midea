@@ -1,5 +1,5 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
-
+import { AxiosError } from 'axios';
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 const request = require("request");
@@ -40,7 +40,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	sessionId: string = ''
 	dataKey : string = ''
 	baseHeader : object
-	axiosConfig : any;
+	apiClient: any;
 	public readonly accessories: PlatformAccessory[] = [];
 	mideaAccessories : MideaAccessory[] = []
 
@@ -55,11 +55,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 
-		this.baseHeader = { 'User-Agent': Constants.UserAgent, 'Content-Type': 'application/x-www-form-urlencoded' }
-		this.axiosConfig = {
-			headers: this.baseHeader
 
-		}
+
+		this.apiClient = axios.create({
+			baseURL: 'https://mapp.appsmb.com/v1',
+			headers: {
+			 'User-Agent': Constants.UserAgent,
+			 'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		})
 		this.log = log;
 		this.config = config;
 		api.on('didFinishLaunching', () => {
@@ -69,23 +73,27 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 	async onReady() {
-		this.login().then(() => {
-			this.log.debug("Login successful");
-			this.getUserList().then(() => {
-				this.updateValues();
-			}).catch(() => {
-				this.log.debug("Get Devices failed");
-			});
+
+		try {
+			await this.login()
+			this.log.debug('Login successful')
+			try {
+				await this.getUserList()
+				this.updateValues()
+			} catch (err) {
+				this.log.debug('getUserList failed')
+			}
 			this.updateInterval = setInterval(() => {
 				this.updateValues();
 			}, this.config['interval'] * 60 * 1000);
-		}).catch(() => {
-			this.log.debug("0");
-		});
+		} catch (err) {
+			this.log.debug('Login failed')
+		}
+		
 	}
-	login() {
-		return new Promise((resolve, reject) => {
-			const url = "https://mapp.appsmb.com/v1/user/login/id/get";
+	async login() {
+		return new Promise(async (resolve, reject) => {
+			const url = "/user/login/id/get";
 
 			const form : any = {
 				loginAccount: this.config['user'],
@@ -100,13 +108,13 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			form.sign = sign;
 			//this.log.debug('login request', qs.stringify(form));
 			
-
-			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+			try {
+				const response = await this.apiClient.post(url, qs.stringify(form))
 				// this.log.debug(response);
 				if (response.data) {
 					const loginId :string = response.data.result.loginId;
 					const password : string = this.getSignPassword(loginId);
-					const url = "https://mapp.appsmb.com/v1/user/login";
+					const url = "/user/login";
 					const form :any = {
 						loginAccount: this.config['user'],
 						src: Constants.RequestSource,
@@ -121,29 +129,31 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					const sign = this.getSign(url, form);
 					form.sign = sign;
 					//this.log.debug('login request 2', qs.stringify(form));
-
-					axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+					try {
+						const loginResponse = await this.apiClient.post(url, qs.stringify(form));
+					
 						//this.log.debug(response);
-						this.atoken = response.data.result.accessToken;
-						this.sessionId = response.data.result.sessionId;
+						this.atoken = loginResponse.data.result.accessToken;
+						this.sessionId = loginResponse.data.result.sessionId;
 						this.generateDataKey();
 						resolve();
-					}). catch((err :any) => {
+					} catch (err) {
 						this.log.debug('Login request 2 failed with', err)
 						reject();
-					});
+					}
+				
 
 				}
 
-			}).catch((err:any) => {
+			} catch(err) {
 				this.log.debug('Login request failed with', err);
 				reject();
-			});
+			}
 		});
 	}
-	getUserList() {
+	async getUserList() {
 		this.log.debug('getUserList called');
-		return new Promise((resolve, reject) => {
+		return new Promise(async (resolve, reject) => {
 			const form :any = {
 				src: Constants.RequestSource,
 				format: Constants.RequestFormat,
@@ -151,11 +161,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				language: Constants.Language,
 				sessionId: this.sessionId
 			};
-			const url = "https://mapp.appsmb.com/v1/appliance/user/list/get";
+			const url = "/user/list/get";
 			const sign = this.getSign(url, form);
 			form.sign = sign;
-
-			axios.post(url, qs.stringify(form), this.axiosConfig).then((response: any) => {
+			try {
+				const response = await axios.post(url, qs.stringify(form))
 				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
 					//	this.log.debug('getUserList result is', response.data.result);
 					response.data.result.list.forEach(async (currentElement: any) => {
@@ -195,10 +205,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				}
 				resolve();
 
-			}).catch((err: any) => {
+			} catch(err) {
 				this.log.debug('getUserList error', err);
-
-			});
+				reject();
+			}
 
 		});
 
@@ -243,9 +253,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		*/
 
 	}
-	sendCommand(device: MideaAccessory, order: any) {
-		if (device) {
-			return new Promise((resolve, reject) => {
+	async sendCommand(device: MideaAccessory, order: any) {
+			return new Promise(async (resolve, reject) => {
+				if (device) {
+
+
 				const orderEncode = Utils.encode(order);
 				const orderEncrypt = this.encryptAes(orderEncode);
 
@@ -259,13 +271,13 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					language: Constants.Language,
 					sessionId: this.sessionId,
 				};
-				const url = "https://mapp.appsmb.com/v1/appliance/transparent/send";
+				const url = "/appliance/transparent/send";
 				const sign = this.getSign(url, form);
 				form.sign = sign;
 
 				//this.log.debug('sendCommand request', qs.stringify(form));
-
-				axios.post(url, qs.stringify(form), this.axiosConfig).then( (response: any) => {
+				try {
+					const response = this.apiClient.post(url, qs.stringify(form))
 					this.log.debug("send successful");
 					const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(response.data.result.reply)));
 					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
@@ -293,12 +305,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					resolve();
 
 
-				}).catch((err: any) => {
+				} catch(err) {
 					this.log.debug('sendCommand request failed', err);
 					reject();
 
-				});
-
+				}
+			} else {
+				this.log.debug('No device specified');
+				reject();
+			}
 			});
 
 /*
@@ -345,9 +360,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				);
 			});
 			*/
-		} else {
-			this.log.debug('No device specified')
-		}
+	
 	}
 	getSign(path: string, form: any) {
 		let postfix = "/" + path.split("/").slice(3).join("/");
@@ -429,7 +442,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		const data = header.concat(Constants.UpdateCommand);
 
 
-		this.accessories.forEach((accessory: PlatformAccessory) => {
+		this.accessories.forEach(async (accessory: PlatformAccessory) => {
 			this.log.debug('update accessory',accessory.context.deviceId)
 			// this.log.debug('current ma are ', this.mideaAccessories)
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
@@ -437,46 +450,34 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
 				
 			} else {
-				this.sendCommand(mideaAccessory, data)
-				.then(() => {
-					this.log.debug("Update successful");
-				})
-				.catch((error) => {
-					this.log.debug(error);
+				try {
+					const response = await this.sendCommand(mideaAccessory, data)
+					this.log.debug('Update successful')
+				} catch (err) {
+					this.log.debug(err);
 					this.log.debug("Try to relogin");
-					this.login()
-					.then(() => {
+					try {
+						const loginResponse = await this.login();
 						this.log.debug("Login successful");
-
-						this.sendCommand(mideaAccessory, data).catch((error) => {
+						try {
+							const commandResponse = await this.sendCommand(mideaAccessory, data)
+						} catch (err) {
 							this.log.debug("update Command still failed after relogin");
-						});
-					})
-					.catch(() => {
+						}
+					} catch (err) {
 						this.log.debug("Login failed");
-					});
-				});
+					}
+
+				}
 			}
 		});
 
 	}
 
-	manualFormEncode(form: any) {
-		const ordered : any = {};
-		Object.keys(form)
-		.sort()
-		.forEach(function (key: any) {
-			ordered[key] = form[key];
-		});
-		const query = Object.keys(ordered)
-		.map((key) => key + "=" + ordered[key])
-		.join("&");
-		return query;
 
-	}
 
-	getFirmwareVersionOfDevice(device: MideaAccessory) {
-		return new Promise((resolve, reject) => {
+	async getFirmwareVersionOfDevice(device: MideaAccessory) {
+		return new Promise(async (resolve, reject) => {
 			let requestObject : object = {
 				applianceId: device.deviceId
 			};
@@ -497,7 +498,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				src: Constants.RequestSource,
 				stamp: Utils.getStamp()
 			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
+			const url = "/app2base/data/transmit?serviceUrl=/ota/version";
 			const sign = this.getSign(url, form);
 
 			form.sign = sign;
@@ -509,8 +510,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}).join('&');
 
 			this.log.debug('we are sending the following form', goodString)
+			try {
+				const response = await this.apiClient.post(url, goodString)
 
-			axios.post(url, goodString, this.axiosConfig).then((response :any) => {
 				this.log.debug(response.data);
 				let decryptedString = this.decryptAesString(response.data.result.returnData)
 				this.log.debug('Got firmware response', decryptedString)
@@ -519,10 +521,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug('got firmware version', device.firmwareVersion)
 
 				resolve();
-			}).catch((err:any) => {
+			} catch(err) {
 				this.log.debug('Failed get firmware', err);
 				reject();
-			});
+			}
+
 
 			
 
@@ -530,7 +533,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		});
 	}
 
-	sendUpdateToDevice(device?: MideaAccessory) {
+	async sendUpdateToDevice(device?: MideaAccessory) {
 		if (device) {
 			const command = new SetCommand();
 			command.powerState = device.powerState;
@@ -546,18 +549,24 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			const data = pktBuilder.finalize();
 			this.log.debug("Command: " + JSON.stringify(command));
 			this.log.debug("Command + Header: " + JSON.stringify(data));
-			this.sendCommand(device, data).catch((error) => {
-				this.log.debug(error);
+			try {
+			const response = await this.sendCommand(device, data)
+			} catch (err) {
+				this.log.debug(err);
 				this.log.debug("Try to relogin");
-				this.login().then(() => {
+				try {
+					const loginResponse = await this.login()
 					this.log.debug("Login successful");
-					this.sendCommand(device, data).catch((error) => {
+					try {
+						await this.sendCommand(device, data)
+					} catch (err) {
 						this.log.debug("Command still failed after relogin");
-					});
-				}).catch(() => {
+
+					}
+				} catch(err) {
 					this.log.debug("Login failed");
-				});
-			});
+				}
+			}
 			//after sending, update because sometimes the api hangs
 			this.updateValues();
 		}
