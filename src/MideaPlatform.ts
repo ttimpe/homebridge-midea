@@ -364,9 +364,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	
 	}
 	getSign(path: string, form: any) {
-		
+		let postfix = "/v1" + path;
 		// Maybe this will help, should remove any query string parameters in the URL from the sign
-		let postfix = path
+		postfix = postfix.split('?')[0]
 		const ordered : any = {};
 		Object.keys(form)
 		.sort()
