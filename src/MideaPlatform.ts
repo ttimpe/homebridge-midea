@@ -165,7 +165,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			try {
 				const response = await this.apiClient.post(url, qs.stringify(form))
 				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
-					//	this.log.debug('getUserList result is', response.data.result);
+					this.log.debug('getUserList result is', response.data.result);
 					response.data.result.list.forEach(async (currentElement: any) => {
 						if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
 							const uuid = this.api.hap.uuid.generate(currentElement.id)
