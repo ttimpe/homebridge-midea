@@ -57,7 +57,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			proxy: {
 				host: '192.168.1.252',
 				port: 8080
-			}
+			},
 		})
 
 
@@ -68,7 +68,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
 			jar: this.jar,
-			httpsAgent: agent
+			httpsAgent: agent,
+			rejectUnauhorized: false
 		})
 		this.log = log;
 		this.config = config;
