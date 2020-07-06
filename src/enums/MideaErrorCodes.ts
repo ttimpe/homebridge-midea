@@ -7,5 +7,6 @@ export enum MideaErrorCodes {
 	InvalidLogin = 3101,
 	InvalidSession = 3106,
 	SignIllegal = 3301,
-	ValueIllegal = 3004
+	ValueIllegal = 3004,
+	NoOpenIdOrUnionId = 3002
 }

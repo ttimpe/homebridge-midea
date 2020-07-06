@@ -57,8 +57,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		this.apiClient = axios.create({
 			baseURL: 'https://mapp.appsmb.com/v1',
 			headers: {
-			 'User-Agent': Constants.UserAgent,
-			 'Content-Type': 'application/x-www-form-urlencoded'
+				'User-Agent': Constants.UserAgent,
+				'Content-Type': 'application/x-www-form-urlencoded'
 			}
 		})
 		this.log = log;
@@ -108,38 +108,47 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			try {
 				const response = await this.apiClient.post(url, qs.stringify(form))
 
-				this.log.debug(response);
-				if (response.data) {
-					const loginId :string = response.data.result.loginId;
-					const password : string = Utils.getSignPassword(loginId, this.config.password);
-					const url = "/user/login";
-					const form :any = {
-						loginAccount: this.config['user'],
-						src: Constants.RequestSource,
-						format: Constants.RequestFormat,
-						stamp: Utils.getStamp(),
-						language: Constants.Language,
-						password: password,
-						clientType: Constants.ClientType,
-						appId: Constants.AppId,
-					};
-
-					const sign = Utils.getSign(url, form);
-					form.sign = sign;
-					//this.log.debug('login request 2', qs.stringify(form));
-					try {
-						const loginResponse = await this.apiClient.post(url, qs.stringify(form));
-					
-						//this.log.debug(response);
-						this.atoken = loginResponse.data.result.accessToken;
-						this.sessionId = loginResponse.data.result.sessionId;
-						this.dataKey = Utils.generateDataKey(this.atoken);
-						resolve();
-					} catch (err) {
-						this.log.debug('Login request 2 failed with', err)
-						reject();
-					}
 				
+				if (response.data) {
+
+					if (response.data.errorCode && response.data.errorCode != '0') {
+						this.log.debug('Login request failed with error',response.data.msg)
+					} else {
+
+						const loginId :string = response.data.result.loginId;
+						const password : string = Utils.getSignPassword(loginId, this.config.password);
+						const url = "/user/login";
+						const form :any = {
+							loginAccount: this.config['user'],
+							src: Constants.RequestSource,
+							format: Constants.RequestFormat,
+							stamp: Utils.getStamp(),
+							language: Constants.Language,
+							password: password,
+							clientType: Constants.ClientType,
+							appId: Constants.AppId,
+						};
+
+						const sign = Utils.getSign(url, form);
+						form.sign = sign;
+						try {
+							const loginResponse = await this.apiClient.post(url, qs.stringify(form));
+
+							//this.log.debug(response);
+							if (loginResponse.data.errorCode && loginResponse.data.errorCode != '0') {
+								this.log.debug('Login request 2 returned error', loginResponse.data.msg);
+								reject();
+							} else {
+								this.atoken = loginResponse.data.result.accessToken;
+								this.sessionId = loginResponse.data.result.sessionId;
+								this.dataKey = Utils.generateDataKey(this.atoken);
+								resolve();
+							}
+						} catch (err) {
+							this.log.debug('Login request 2 failed with', err)
+							reject();
+						}
+					}
 
 				}
 
@@ -165,43 +174,50 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			try {
 				const response = await this.apiClient.post(url, qs.stringify(form))
 				this.log.debug('getUserList result is', response);
-				if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
-					response.data.result.list.forEach(async (currentElement: any) => {
-						if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
-							const uuid = this.api.hap.uuid.generate(currentElement.id)
 
-							const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
+				if (response.data.errorCode && response.data.errorCode != '0') {
+					this.log.debug('getUserList returned error', response.msg);
+					reject();
+				} else {
+					if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
+						response.data.result.list.forEach(async (currentElement: any) => {
+							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
+								const uuid = this.api.hap.uuid.generate(currentElement.id)
+								const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
 
-							if (existingAccessory) {
-								this.log.debug('Restoring cached accessory', existingAccessory.displayName)
-								existingAccessory.context.deviceId = currentElement.id
-								existingAccessory.context.deviceType = parseInt(currentElement.type)
-								existingAccessory.context.name = currentElement.name
-								this.api.updatePlatformAccessories([existingAccessory])
+								if (existingAccessory) {
+									this.log.debug('Restoring cached accessory', existingAccessory.displayName)
+									existingAccessory.context.deviceId = currentElement.id
+									existingAccessory.context.deviceType = parseInt(currentElement.type)
+									existingAccessory.context.name = currentElement.name
+									this.api.updatePlatformAccessories([existingAccessory])
 
-								var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
-								this.mideaAccessories.push(ma)
+									var ma = new MideaAccessory(this, existingAccessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+									this.mideaAccessories.push(ma)
+								} else {
+									this.log.debug('Adding new device:', currentElement.name)
+									const accessory = new this.api.platformAccessory(currentElement.name, uuid)
+									accessory.context.deviceId = currentElement.id
+									accessory.context.name = currentElement.name
+									accessory.context.deviceType = parseInt(currentElement.type)
+									var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
+									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
+
+									this.mideaAccessories.push(ma)
+								}
+								// this.log.debug('mideaAccessories now contains', this.mideaAccessories)
 							} else {
-								this.log.debug('Adding new device:', currentElement.name)
-								const accessory = new this.api.platformAccessory(currentElement.name, uuid)
-								accessory.context.deviceId = currentElement.id
-								accessory.context.name = currentElement.name
-								accessory.context.deviceType = parseInt(currentElement.type)
-
-								var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
-								this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
-
-								this.mideaAccessories.push(ma)
+								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
+								this.log.warn('Please open an issue on GitHub with your specific device model')
 							}
-							// this.log.debug('mideaAccessories now contains', this.mideaAccessories)
-						} else {
-							this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
-							this.log.warn('Please open an issue on GitHub with your specific device model')
-						}
+						});
+						resolve();
 
-					});
+					} else {
+						this.log.debug('getUserList invalid response');
+						reject();
+					}
 				}
-				resolve();
 
 			} catch(err) {
 				this.log.debug('getUserList error', err);
@@ -209,51 +225,10 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}
 
 		});
-
-/*
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				json: true,
-				form: form,
-				jar: this.jar,
-				gzip: true,
-			},
-			(err: any, resp: any, body: any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to login");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject();
-					return;
-				}
-
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					this.log.debug(body.msg);
-					this.log.debug(body.errorCode);
-					reject();
-					return;
-				}
-				try {
-					
-				} catch (error) {
-					this.log.debug(error);
-					this.log.debug(error.stack);
-					reject();
-				}
-			}
-			);
-		});
-		*/
-
 	}
 	async sendCommand(device: MideaAccessory, order: any) {
-			return new Promise(async (resolve, reject) => {
-				if (device) {
+		return new Promise(async (resolve, reject) => {
+			if (device) {
 
 
 				const orderEncode = Utils.encode(order);
@@ -276,32 +251,38 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				//this.log.debug('sendCommand request', qs.stringify(form));
 				try {
 					const response = this.apiClient.post(url, qs.stringify(form))
-					this.log.debug("send successful");
-					const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
-					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
-					this.log.debug('target temperature', applianceResponse.targetTemperature);
+					if (response.data.errorCode && response.data.errorCode != '0') {
+						this.log.debug('sendCommand returned error', response.data.msg)
+						reject();
+					} else {
 
-					device.targetTemperature = applianceResponse.targetTemperature;
-					device.indoorTemperature = applianceResponse.indoorTemperature;
-					device.fanSpeed = applianceResponse.fanSpeed;
-					device.powerState = applianceResponse.powerState ? 1 : 0
-					device.swingMode = applianceResponse.swingMode;
-					device.operationalMode = applianceResponse.operationalMode;
-					device.humidty = applianceResponse.humidity
-					device.useFahrenheit = applianceResponse.tempUnit
-					device.ecoMode = applianceResponse.ecoMode
-					this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
-					this.log.debug('swingMode is set to', applianceResponse.swingMode);
-					this.log.debug('powerState is set to', applianceResponse.powerState);
-					this.log.debug('operational mode is set to', applianceResponse.operationalMode);
-					this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
-					this.log.debug('ecoMode is set to', applianceResponse.ecoMode)
+						this.log.debug("send successful");
+						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
+						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
 
-					this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
+						this.log.debug('target temperature', applianceResponse.targetTemperature);
 
-					resolve();
+						device.targetTemperature = applianceResponse.targetTemperature;
+						device.indoorTemperature = applianceResponse.indoorTemperature;
+						device.fanSpeed = applianceResponse.fanSpeed;
+						device.powerState = applianceResponse.powerState ? 1 : 0
+						device.swingMode = applianceResponse.swingMode;
+						device.operationalMode = applianceResponse.operationalMode;
+						device.humidty = applianceResponse.humidity
+						device.useFahrenheit = applianceResponse.tempUnit
+						device.ecoMode = applianceResponse.ecoMode
+						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
+						this.log.debug('swingMode is set to', applianceResponse.swingMode);
+						this.log.debug('powerState is set to', applianceResponse.powerState);
+						this.log.debug('operational mode is set to', applianceResponse.operationalMode);
+						this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
+						this.log.debug('ecoMode is set to', applianceResponse.ecoMode)
 
+						this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
+
+						resolve();
+					}
 
 				} catch(err) {
 					this.log.debug('sendCommand request failed', err);
@@ -312,55 +293,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.debug('No device specified');
 				reject();
 			}
-			});
-
-/*
-				(err: any, resp: any, body: any) => {
-					if (err || (resp && resp.statusCode >= 400) || !body) {
-						this.log.debug("Failed to send command");
-						err && this.log.debug(err);
-						body && this.log.debug(JSON.stringify(body));
-						resp && this.log.debug(resp.statusCode);
-						reject(err);
-						return;
-					}
-
-					this.log.debug(JSON.stringify(body));
-					if (body.errorCode && body.errorCode !== "0") {
-						if (body.errorCode == MideaErrorCodes.DeviceUnreachable) {
-							this.log.debug("Cannot reach " + device.deviceId + " " + body.msg);
-
-							resolve();
-							return;
-						}
-						if (body.errorCode == MideaErrorCodes.CommandNotAccepted) {
-							this.log.debug("Command was not accepted by device. Command wrong or device not reachable " + device.deviceId + " " + body.msg);
-
-							resolve();
-							return;
-						}
-						this.log.debug("Sending failed device returns an error");
-						this.log.debug(body.errorCode);
-						this.log.debug(body.msg);
-						reject(body.msg);
-						return;
-					}
-					try {
-						
-					} catch (error) {
-						this.log.debug(body);
-						this.log.debug(error);
-
-						this.log.debug(error.stack);
-						reject();
-					}
-				}
-				);
-			});
-			*/
-	
+		});
 	}
-	
+
 
 
 
@@ -382,6 +317,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				try {
 					const response = await this.sendCommand(mideaAccessory, data)
 					this.log.debug('Update successful')
+					
 				} catch (err) {
 					this.log.debug(err);
 					this.log.debug("Try to relogin");
@@ -434,8 +370,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			let formQS = qs.stringify(form);
 			formQS = formQS.split('%2F').join('/');
 			const goodString = formQS.split('&').sort().map((val :any) => {
-    			let [k,v] = val.split('=');
-    			return [k, v.split(',').sort().join(',')].join('=');
+				let [k,v] = val.split('=');
+				return [k, v.split(',').sort().join(',')].join('=');
 			}).join('&');
 
 			this.log.debug('we are sending the following form', goodString)
@@ -456,7 +392,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}
 
 
-			
+
 
 
 		});
