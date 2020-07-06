@@ -7,7 +7,10 @@ const crypto = require("crypto");
 const https = require('https');
 
 
-const axios = require('axios').default;
+const axios = require('axios').default
+
+const tunnel = require('tunnel');
+
 const axiosCookieJarSupport =  require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 
@@ -50,8 +53,12 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		axiosCookieJarSupport(axios);
 		this.jar = new tough.CookieJar()
 
-
-
+		const agent = tunnel.httpsOverHttp({
+			proxy: {
+				host: 'http://192.168.1.252',
+				port: 8080
+			}
+		})
 
 
 		this.apiClient = axios.create({
@@ -60,7 +67,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				'User-Agent': Constants.UserAgent,
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
-			jar: this.jar
+			jar: this.jar,
+			httpsAgent: agent
 		})
 		this.log = log;
 		this.config = config;
