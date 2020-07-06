@@ -110,7 +110,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			
 			try {
 				const response = await this.apiClient.post(url, qs.stringify(form))
-				// this.log.debug(response);
+
+				this.log.debug(response);
 				if (response.data) {
 					const loginId :string = response.data.result.loginId;
 					const password : string = this.getSignPassword(loginId);
