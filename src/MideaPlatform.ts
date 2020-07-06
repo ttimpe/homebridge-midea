@@ -58,6 +58,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				host: '192.168.1.252',
 				port: 8080
 			},
+			rejectUnauhorized: false
 		})
 
 
@@ -68,8 +69,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
 			jar: this.jar,
-			httpsAgent: agent,
-			rejectUnauhorized: false
+			httpsAgent: agent
 		})
 		this.log = log;
 		this.config = config;
