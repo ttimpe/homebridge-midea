@@ -372,8 +372,9 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 		this.accessories.forEach(async (accessory: PlatformAccessory) => {
-			this.log.debug('update accessory',accessory.context.deviceId)
 			// this.log.debug('current ma are ', this.mideaAccessories)
+			this.log.debug('update accessory',accessory.context.deviceId)
+			this.log.debug(JSON.stringify(this.mideaAccessories))
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory === undefined) {
 				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
