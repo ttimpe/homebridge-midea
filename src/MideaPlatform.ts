@@ -354,7 +354,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	async getFirmwareVersionOfDevice(device: MideaAccessory) {
 		return new Promise(async (resolve, reject) => {
 			let requestObject : object = {
-				applianceId: device.deviceId
+				applianceId: device.deviceId,
+				userId: device.userId
 			};
 			let json = JSON.stringify(requestObject);
 			json = json.split(',').join(', ');
@@ -389,12 +390,17 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				const response = await this.apiClient.post(url, goodString)
 
 				this.log.debug(response.data);
-				let decryptedString = Utils.decryptAesString(response.data.result.returnData, this.dataKey)
-				this.log.debug('Got firmware response', decryptedString)
-				let responseObject = JSON.parse(decryptedString)
-				device.firmwareVersion = responseObject.result.version
-				this.log.debug('got firmware version', device.firmwareVersion)
-
+				if (response.data.errorCode && response.data.errorCode != '0') { 
+					let decryptedString = Utils.decryptAesString(response.data.result.returnData, this.dataKey)
+					this.log.debug('Got firmware response', decryptedString)
+					let responseObject = JSON.parse(decryptedString)
+					device.firmwareVersion = responseObject.result.version
+					this.log.debug('got firmware version', device.firmwareVersion)
+					resolve();
+				} else {
+					this.log.warn('Failed get firmware', response.data.msg);
+					reject();
+				}
 				resolve();
 			} catch(err) {
 				this.log.warn('Failed get firmware', err);
