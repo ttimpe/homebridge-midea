@@ -178,7 +178,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				language: Constants.Language,
 				sessionId: this.sessionId
 			};
-			const url = "/user/list/get";
+			const url = "/appliance/user/list/get";
 			const sign = Utils.getSign(url, form);
 			form.sign = sign;
 			try {
