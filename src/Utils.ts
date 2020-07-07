@@ -50,6 +50,7 @@ export default class Utils {
 	static getSign(path: string, form: any) {
 		if (path != '' && form) {
 			let postfix = "/v1" + path;
+			postfix = postfix.split('?')[0]
 			// Maybe this will help, should remove any query string parameters in the URL from the sign
 			const ordered : any = {};
 			Object.keys(form)

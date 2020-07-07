@@ -60,22 +60,22 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				rejectUnauthorized: false
 			})
 			this.apiClient = axios.create({
-			baseURL: 'https://mapp.appsmb.com/v1',
-			headers: {
-				'User-Agent': Constants.UserAgent,
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			jar: this.jar,
-			httpsAgent: agent
+				baseURL: 'https://mapp.appsmb.com/v1',
+				headers: {
+					'User-Agent': Constants.UserAgent,
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				jar: this.jar,
+				httpsAgent: agent
 		})
 		} else {
 			this.apiClient = axios.create({
-			baseURL: 'https://mapp.appsmb.com/v1',
-			headers: {
-				'User-Agent': Constants.UserAgent,
-				'Content-Type': 'application/x-www-form-urlencoded'
-			},
-			jar: this.jar
+				baseURL: 'https://mapp.appsmb.com/v1',
+				headers: {
+					'User-Agent': Constants.UserAgent,
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				jar: this.jar
 			})
 		}
 
@@ -90,7 +90,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 	async onReady() {
-
 		try {
 			await this.login()
 			this.log.debug('Login successful')
@@ -315,9 +314,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		});
 	}
 
-
-
-
 	updateValues() {
 		const header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
 
@@ -355,10 +351,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				}
 			}
 		});
-
 	}
-
-
 
 	async getFirmwareVersionOfDevice(device: MideaAccessory) {
 		return new Promise(async (resolve, reject) => {
@@ -462,6 +455,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			this.updateValues();
 		}
 	}
+
 	getDeviceSpecificOverrideValue(deviceId: string, key: string) {
 		if (this.config) {
 			if (this.config.hasOwnProperty('devices')) {
