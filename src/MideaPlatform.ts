@@ -58,7 +58,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				host: '192.168.1.252',
 				port: 8080
 			},
-			rejectUnauhorized: false
+			rejectUnauthorized: false
 		})
 
 
