@@ -52,17 +52,14 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 		axiosCookieJarSupport(axios);
 		this.jar = new tough.CookieJar()
-
-		const agent = tunnel.httpsOverHttp({
-			proxy: {
-				host: '192.168.1.252',
-				port: 8080
-			},
-			rejectUnauthorized: false
-		})
-
-
-		this.apiClient = axios.create({
+		let agent :any;
+		if (this.config.proxy) {
+			this.log.info('Using debugging proxy specified in config.json')
+			const agent = tunnel.httpsOverHttp({
+				proxy: this.config.proxy,
+				rejectUnauthorized: false
+			})
+			this.apiClient = axios.create({
 			baseURL: 'https://mapp.appsmb.com/v1',
 			headers: {
 				'User-Agent': Constants.UserAgent,
@@ -71,6 +68,19 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			jar: this.jar,
 			httpsAgent: agent
 		})
+		} else {
+			this.apiClient = axios.create({
+			baseURL: 'https://mapp.appsmb.com/v1',
+			headers: {
+				'User-Agent': Constants.UserAgent,
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			jar: this.jar
+			})
+		}
+
+
+
 		this.log = log;
 		this.config = config;
 		api.on('didFinishLaunching', () => {
