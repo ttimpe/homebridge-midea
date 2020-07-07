@@ -391,15 +391,15 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 				this.log.debug(response.data);
 				if (response.data.errorCode && response.data.errorCode != '0') { 
+					this.log.warn('Failed get firmware', response.data.msg);
+					reject();		
+				} else {
 					let decryptedString = Utils.decryptAesString(response.data.result.returnData, this.dataKey)
 					this.log.debug('Got firmware response', decryptedString)
 					let responseObject = JSON.parse(decryptedString)
 					device.firmwareVersion = responseObject.result.version
 					this.log.debug('got firmware version', device.firmwareVersion)
 					resolve();
-				} else {
-					this.log.warn('Failed get firmware', response.data.msg);
-					reject();
 				}
 				resolve();
 			} catch(err) {
