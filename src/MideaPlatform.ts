@@ -260,7 +260,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 				//this.log.debug('sendCommand request', qs.stringify(form));
 				try {
-					const response = this.apiClient.post(url, qs.stringify(form))
+					const response = await this.apiClient.post(url, qs.stringify(form))
 
 					if (response.data.errorCode && response.data.errorCode != '0') {
 						this.log.error('sendCommand returned error', response.data.msg)
