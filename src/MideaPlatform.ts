@@ -349,20 +349,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						const response = await this.sendCommand(mideaAccessory, data)
 						this.log.debug('Update successful')
 					} else if (mideaAccessory.deviceType == MideaDeviceType.Dehumidifier) {
-						let updateCommand = [
-  90,  90, 1,   0,  91,   0,  32,  -128,
-  80,  0,  0,   0,  0,    0,  0,   0,
-  0,   0,  0,   0,  -107, 97, 0,   0,
-  0,   18, 0,   0,  0,    0,  0,   0,
-  0,   0,  0,   0,  0,    0,  0,   0,
-  -86, 34, -95, 0,  0,    0,  0,   0,
-  3,   3,  -56, 0,  2,    80, 127, 127,
-  0,   35, 0,   0,  0,    0,  0,   0,
-  0,  0, 64,  88, 0,    0,  0,   0,
-  16,  58, 26,  0,  0,    0,  0,   0,
-  0,   0,  0,   0,  0,    0,  0,   0,
-  0
-];
+						let header1 = [90,90,1,0,89,0,32,0,1,0,0,0,39,36,17,9,13,10,18,20,218,73,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+						let updateCommand = header1.concat([-86, 32, -95, 0, 0, 0, 0, 0, 3, 3, 65, 33, 0, -1, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 36, -92])
 						const response = await this.sendCommand(mideaAccessory, updateCommand)
 						this.log.debug('sent update command to dehumidifier')
 					}

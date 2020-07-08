@@ -309,6 +309,8 @@ export default class Constants {
 	154,
 	166,
 	];
+
+	
 	public static UserAgent :string = 'Dalvik/2.1.0 (Linux; U; Android 7.0; SM-G935F Build/NRD90M)'
 	// These values are from the official Midea Air app, adjust if you want to use different credentials
 	public static AppId : string = '1117'
