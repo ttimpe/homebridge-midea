@@ -132,7 +132,9 @@ export class MideaAccessory {
 				.on('get', this.handleTargetHumidifierDehumidifierStateGet.bind(this))
 				.on('set', this.handleTargetHumidifierDehumidifierStateSet.bind(this))
 
-
+				this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
+				.on('get', this.handleRelativeDehumidifierThresholdGet.bind(this))
+				.on('set', this.handleRelativeDehumidifierThresholdSet.bind(this))
 
 			}
 			break
@@ -483,5 +485,11 @@ export class MideaAccessory {
 		callback(null, 1)
 	}
 
+	handleRelativeDehumidifierThresholdGet(callback: CharacteristicGetCallback) {
+		callback(null, this.targetHumidity)
+	}
+	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
+		callback(null, value);
+	}
 
 }
