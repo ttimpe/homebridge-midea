@@ -137,6 +137,10 @@ export class MideaAccessory {
 				.on('get', this.handleRelativeDehumidifierThresholdGet.bind(this))
 				.on('set', this.handleRelativeDehumidifierThresholdSet.bind(this))
 
+				this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityHumidifierThreshold)
+				.on('get', this.handleRelativeHumidifierThresholdGet.bind(this))
+				.on('set', this.handleRelativeHumidifierThresholdSet.bind(this))
+
 				this.service.getCharacteristic(this.platform.Characteristic.WaterLevel).
 				on('get', this.handleWaterLevelGet.bind(this))
 
@@ -493,11 +497,21 @@ export class MideaAccessory {
 
 	handleRelativeDehumidifierThresholdGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('returning target humidity of ', this.targetHumidity)
-		callback(null, 50.0)
+		callback(null, this.targetHumidity)
 	}
 	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
 		callback(null, value);
 	}
+
+	handleRelativeHumidifierThresholdGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('returning target humidity of ', this.targetHumidity)
+		callback(null, this.targetHumidity)
+	}
+	handleRelativeHumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
+		callback(null, value);
+	}
+
+
 
 	handleWaterLevelGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('Returning water level of', this.waterLevel)
