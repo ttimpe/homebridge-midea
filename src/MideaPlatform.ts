@@ -22,6 +22,12 @@ import ApplianceResponse from './ApplianceResponse'
 import SetCommand from './SetCommand'
 import PacketBuilder from './PacketBuilder'
 
+import ACSetCommand from './commands/ACSetCommand';
+import DehumidifierSetCommand from './commands/DehumidifierSetCommand';
+
+import ACApplianceResponse from './responses/ACApplianceResponse'
+import DehumidifierApplianceResponse from './responses/DehumidifierApplianceResponse'
+
 import { MideaAccessory } from './MideaAccessory'
 import { MideaDeviceType } from './enums/MideaDeviceType'
 import { MideaErrorCodes } from './enums/MideaErrorCodes' 
@@ -67,7 +73,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				},
 				jar: this.jar,
 				httpsAgent: agent
-		})
+			})
 		} else {
 			this.apiClient = axios.create({
 				baseURL: 'https://mapp.appsmb.com/v1',
@@ -276,26 +282,35 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					} else {
 
 						this.log.debug("send successful");
-						const applianceResponse :ApplianceResponse = new ApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
-						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
+						let applianceResponse : any
+						if (device.deviceType == MideaDeviceType.AirConditioner) {
+							applianceResponse = new ACApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
+							device.targetTemperature = applianceResponse.targetTemperature;
+							device.indoorTemperature = applianceResponse.indoorTemperature;
+							device.useFahrenheit = applianceResponse.tempUnit
 
-						this.log.debug('target temperature', applianceResponse.targetTemperature);
+							this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
+							this.log.debug('ecoMode is set to', applianceResponse.ecoMode)
+							this.log.debug('target temperature', applianceResponse.targetTemperature);
 
-						device.targetTemperature = applianceResponse.targetTemperature;
-						device.indoorTemperature = applianceResponse.indoorTemperature;
+						} else if (device.deviceType == MideaDeviceType.Dehumidifier) {
+							applianceResponse = new DehumidifierApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
+							device.humidty = applianceResponse.humidity
+							this.log.debug('humidity is at', device.humidty)
+
+						}
 						device.fanSpeed = applianceResponse.fanSpeed;
 						device.powerState = applianceResponse.powerState ? 1 : 0
 						device.swingMode = applianceResponse.swingMode;
 						device.operationalMode = applianceResponse.operationalMode;
-						device.humidty = applianceResponse.humidity
-						device.useFahrenheit = applianceResponse.tempUnit
+
 						device.ecoMode = applianceResponse.ecoMode
+						
 						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
 						this.log.debug('swingMode is set to', applianceResponse.swingMode);
 						this.log.debug('powerState is set to', applianceResponse.powerState);
 						this.log.debug('operational mode is set to', applianceResponse.operationalMode);
-						this.log.debug('useFahrenheit is set to', applianceResponse.tempUnit)
-						this.log.debug('ecoMode is set to', applianceResponse.ecoMode)
+
 
 						this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
 
@@ -418,13 +433,21 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 	async sendUpdateToDevice(device?: MideaAccessory) {
 		if (device) {
-			const command = new SetCommand();
+
+			let command : any
+			if (device.deviceType == MideaDeviceType.AirConditioner) {
+				command = new ACSetCommand();
+				command.useFahrenheit = device.useFahrenheit
+				command.targetTemperature = device.targetTemperature;
+
+			} else if (device.deviceType == MideaDeviceType.Dehumidifier) {
+				command = new DehumidifierSetCommand()
+			}
 			command.powerState = device.powerState;
-			command.targetTemperature = device.targetTemperature;
 			command.swingMode = device.swingMode;
 			command.fanSpeed = device.fanSpeed;
 			command.operationalMode = device.operationalMode
-			command.useFahrenheit = device.useFahrenheit
+
 			command.ecoMode = device.ecoMode
 			//operational mode for workaround with fan only mode on device
 			const pktBuilder = new PacketBuilder();

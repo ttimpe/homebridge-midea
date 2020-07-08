@@ -25,12 +25,7 @@ export default class ApplianceResponse {
         return (this.data[0x01] & 0x80) > 0;
     }
 
-    // Byte 0x02
-    get targetTemperature() {
-        return (this.data[0x02] & 0xf) + 16;
-    }
-
-    get operationalMode() : MideaOperationalMode {
+    get operationalMode() : number {
         return (this.data[0x02] & 0xe0) >> 5;
     }
 
@@ -103,9 +98,6 @@ export default class ApplianceResponse {
 		return (this.data[0x09] & 0x04) > 0;
     }
 
-    get auxHeat() {
-        return (this.data[0x09] & 0x08) > 0;
-    }
 
     get ecoMode() {
         return (this.data[0x09] & 0x10) > 0;
@@ -116,10 +108,7 @@ export default class ApplianceResponse {
         return (this.data[0x09] & 0x20) > 0;
     }
 
-    get tempUnit() {
-        // This needs a better name, dunno what it actually means
-        return this.data[23] > 0;
-    }
+
 
     // Byte 0x0a
     get sleepFunction() {
@@ -130,10 +119,7 @@ export default class ApplianceResponse {
         return (this.data[0x0a] & 0x02) > 0;
     }
 
-    get catchCold() {
-        // This needs a better name, dunno what it actually means
-        return (this.data[0x0a] & 0x08) > 0;
-    }
+
 
     get nightLight() {
         // This needs a better name, dunno what it actually means
@@ -150,15 +136,7 @@ export default class ApplianceResponse {
         return (this.data[0x0a] & 0x40) > 0;
     }
 
-    // Byte 0x0b
-    get indoorTemperature() {
-        return (this.data[0x0b] - 50) / 2.0;
-    }
 
-    // Byte 0x0c
-    get outdoorTemperature() {
-        return (this.data[0x0c] - 50) / 2.0;
-    }
 
     // Byte 0x0d
     get humidity() {

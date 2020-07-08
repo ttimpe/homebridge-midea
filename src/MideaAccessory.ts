@@ -50,20 +50,20 @@ export class MideaAccessory {
 		var smode = this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'supportedSwingMode');
 
 		if (smode) {
-				switch (smode) {
-					case 'Vertical':
-					this.supportedSwingMode = MideaSwingMode.Vertical;
-					break;
-					case 'Horizontal':
-					this.supportedSwingMode = MideaSwingMode.Horizontal;
-					break;
-					case 'Both':
-					this.supportedSwingMode = MideaSwingMode.Both;
-					break;
-					default:
-					this.supportedSwingMode = MideaSwingMode.None;
-					break;
-				}
+			switch (smode) {
+				case 'Vertical':
+				this.supportedSwingMode = MideaSwingMode.Vertical;
+				break;
+				case 'Horizontal':
+				this.supportedSwingMode = MideaSwingMode.Horizontal;
+				break;
+				case 'Both':
+				this.supportedSwingMode = MideaSwingMode.Both;
+				break;
+				default:
+				this.supportedSwingMode = MideaSwingMode.None;
+				break;
+			}
 		}
 
 		var tsteps = this.platform.getDeviceSpecificOverrideValue(this.deviceId, 'temperatureSteps');
@@ -74,12 +74,12 @@ export class MideaAccessory {
 
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
 		this.platform.getFirmwareVersionOfDevice(this).then(()=> {
-		this.platform.log.debug('Got firmware, setting version')
-		this.accessory.getService(this.platform.Service.AccessoryInformation)!
-		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
-		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
-		.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
-		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
+			this.platform.log.debug('Got firmware, setting version')
+			this.accessory.getService(this.platform.Service.AccessoryInformation)!
+			.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
+			.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
+			.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
+			.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
 		}).catch(() => {
 			this.platform.log.debug('Could not get firmware version');
 		})
@@ -175,10 +175,10 @@ export class MideaAccessory {
 				.on('set', this.handleRotationSpeedSet.bind(this));
 
 				if (this.fanService != undefined) {
-						  // for fan only mode
-      				this.fanService.getCharacteristic(this.platform.Characteristic.Active)
-      				.on('get', this.handleFanActiveGet.bind(this))
-      				.on('set', this.handleFanActiveSet.bind(this));
+					// for fan only mode
+					this.fanService.getCharacteristic(this.platform.Characteristic.Active)
+					.on('get', this.handleFanActiveGet.bind(this))
+					.on('set', this.handleFanActiveSet.bind(this));
 				}
 
 			}
@@ -331,10 +331,10 @@ export class MideaAccessory {
    handleTemperatureDisplayUnitsSet(value: CharacteristicValue, callback: CharacteristicSetCallback) {
    	this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
    	if (value == this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
-		this.useFahrenheit = true;
-	} else {
-		this.useFahrenheit = false;
-	}
+   		this.useFahrenheit = true;
+   	} else {
+   		this.useFahrenheit = false;
+   	}
    	callback(null, value);
    	this.platform.sendUpdateToDevice(this);
 
@@ -452,50 +452,35 @@ export class MideaAccessory {
 		}
 
 		else {
-			//				if (Characteristic.CurrentHeatingCoolingState.COOL){
-				//				this.operationalMode = 2;
-				//				}
-				//				else if (Characteristic.CurrentHeatingCoolingState.AUTO){
-					//					// normaly to 1, but we only want to cool
-					//					this.operationalMode = 1;
-					//					this.operationalMode = 2;
-					//				}
-					//			else if (Characteristic.CurrentHeatingCoolingState.HEAT){
-						//				normaly to 4, but we only want to cool
-						//				this.operationalMode = 4;
-						//				this.operationalMode = 2;
-						//			}
-						//			set default to mode "2" if it is off
-						//			else {
-							//			}
-							this.operationalMode = MideaOperationalMode.Cooling;
+			
+			this.operationalMode = MideaOperationalMode.Cooling;
 
-						}
-						this.platform.sendUpdateToDevice(this);
-						callback(null, value);
-					}
+		}
+		this.platform.sendUpdateToDevice(this);
+		callback(null, value);
+	}
 
 
-					// HumidifierDehumidifier
+	// HumidifierDehumidifier
 
-					handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
-						this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
-						callback(null, this.humidty)
-					}
+	handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
+		callback(null, this.humidty)
+	}
 
-					handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
-						this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
-						callback(null, 1)
-					}
-					handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
-						this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
-						callback(null, value)
-					}
+	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
+		callback(null, 1)
+	}
+	handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
+		this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
+		callback(null, value)
+	}
 
-					handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
-						this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
-						callback(null, 1)
-					}
+	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
+		callback(null, 1)
+	}
 
 
-				}
+}
