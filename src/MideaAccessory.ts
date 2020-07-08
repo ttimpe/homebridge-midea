@@ -486,6 +486,7 @@ export class MideaAccessory {
 	}
 
 	handleRelativeDehumidifierThresholdGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('returning target humidity of ', this.targetHumidity)
 		callback(null, this.targetHumidity)
 	}
 	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
