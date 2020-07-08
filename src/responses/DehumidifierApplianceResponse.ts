@@ -10,4 +10,8 @@ export default class DehumidifierApplianceResponse extends ApplianceResponse {
     	return this.data[0x07];
     }
 
+    get waterLevel() {
+    	return this.data[0x0a] & 127;
+
+    }
 }

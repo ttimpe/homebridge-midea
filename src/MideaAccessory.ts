@@ -26,6 +26,7 @@ export class MideaAccessory {
 	public name: string = ''
 	public currentHumidity: number = 0
 	public targetHumidity : number = 0
+	public waterLevel : number = 0
 	public userId: string = ''
 	public firmwareVersion: string = '0.0'
 
@@ -135,6 +136,11 @@ export class MideaAccessory {
 				this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
 				.on('get', this.handleRelativeDehumidifierThresholdGet.bind(this))
 				.on('set', this.handleRelativeDehumidifierThresholdSet.bind(this))
+
+				this.service.getCharacteristic(this.platform.Characteristic.WaterLevel).
+				on('get', this.handleWaterLevelGet.bind(this))
+
+
 
 			}
 			break
@@ -491,6 +497,11 @@ export class MideaAccessory {
 	}
 	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
 		callback(null, value);
+	}
+
+	handleWaterLevelGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Returning water level of', this.waterLevel)
+		callback(null, this.waterLevel)
 	}
 
 }

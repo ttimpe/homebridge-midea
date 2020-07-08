@@ -299,6 +299,8 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 							this.log.debug('humidity is at', device.currentHumidity)
 							device.targetHumidity = applianceResponse.targetHumidity
 							this.log.debug('target humidity is at', device.targetHumidity)
+							device.waterLevel = applianceResponse.waterLevel;
+							this.log.debug('water level is at', device.waterLevel)
 
 						}
 						device.fanSpeed = applianceResponse.fanSpeed;
