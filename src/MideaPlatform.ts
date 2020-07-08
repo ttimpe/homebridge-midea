@@ -305,7 +305,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						device.operationalMode = applianceResponse.operationalMode;
 
 						device.ecoMode = applianceResponse.ecoMode
-						
+
 						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
 						this.log.debug('swingMode is set to', applianceResponse.swingMode);
 						this.log.debug('powerState is set to', applianceResponse.powerState);
@@ -345,8 +345,23 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				this.log.warn('Could not find accessory with id', accessory.context.deviceId)
 			} else {
 				try {
-					const response = await this.sendCommand(mideaAccessory, data)
-					this.log.debug('Update successful')
+					if (mideaAccessory.deviceType == MideaDeviceType.AirConditioner) {
+						const response = await this.sendCommand(mideaAccessory, data)
+						this.log.debug('Update successful')
+					} else if (mideaAccessory.deviceType == MideaDeviceType.Dehumidifier) {
+						let updateCommand = [
+						90,  90,  1,  16,  89,   0,  32,   0,  80,   0,   0,   0,
+						77, 225, 30,  14,   8,   7,  20,  20, 149,  97,   0,   0,
+						0,  18,  0,   0,  27,   4,   6,   1,   1,   9,   0,   0,
+						0,   0,  0,   0, 170,  32, 161,   0,   0,   0,   0,   0,
+						3,   3, 65,  33,   0, 255,   3,   0,   0,   2,   0,   0,
+						0,   0,  0,   0,   0,   0,   0,   0,   0,   0,  16, 153,
+						42, 247, 95, 185, 228, 173, 211, 165, 213, 147, 222, 119,
+						245
+						];
+						const response = await this.sendCommand(mideaAccessory, updateCommand)
+						this.log.debug('sent update command to dehumidifier')
+					}
 					
 				} catch (err) {
 					this.log.debug(err);
