@@ -24,7 +24,8 @@ export class MideaAccessory {
 	public swingMode :number = 0
 	public ecoMode :boolean = false
 	public name: string = ''
-	public humidty: number = 0
+	public currentHumidity: number = 0
+	public targetHumidity : number = 0
 	public userId: string = ''
 	public firmwareVersion: string = '0.0'
 
@@ -452,7 +453,7 @@ export class MideaAccessory {
 		}
 
 		else {
-			
+
 			this.operationalMode = MideaOperationalMode.Cooling;
 
 		}
@@ -465,7 +466,7 @@ export class MideaAccessory {
 
 	handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
-		callback(null, this.humidty)
+		callback(null, this.currentHumidity)
 	}
 
 	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
