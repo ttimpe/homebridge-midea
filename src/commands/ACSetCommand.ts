@@ -1,5 +1,5 @@
 import SetCommand from '../SetCommand'
-
+import { MideaSwingMode } from '../enums/MideaSwingMode'
 export default class ACSetCommand extends SetCommand {
 	 get targetTemperature() {
         return this.data[0x0c] & 0x1f;
@@ -36,5 +36,30 @@ export default class ACSetCommand extends SetCommand {
           this.data[0x14] &= ~mask;
       }
      }
-       
+      
+    get fanSpeed() {
+        return this.data[0x0d];
+    }
+
+    set fanSpeed(speed: number) {
+        this.data[0x0d] = speed;
+    }
+
+    get ecoMode() {
+        return this.data[0x13] > 0;
+    }
+
+    set ecoMode(ecoModeEnabled: boolean) {
+        this.data[0x13] = ecoModeEnabled ? 0xff : 0;
+    }
+
+    get swingMode() {
+        return this.data[0x11];
+    }
+
+    set swingMode(mode: MideaSwingMode) {
+        this.data[0x11] &= ~0x0f; // Clear the mode bit
+        this.data[0x11] |= mode & 0x0f;
+    }
+
 }

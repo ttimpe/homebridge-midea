@@ -133,6 +133,7 @@ export class MideaAccessory {
 				.on('get', this.handleTargetHumidifierDehumidifierStateGet.bind(this))
 				.on('set', this.handleTargetHumidifierDehumidifierStateSet.bind(this))
 
+
 				this.service.getCharacteristic(this.platform.Characteristic.RelativeHumidityDehumidifierThreshold)
 				.on('get', this.handleRelativeDehumidifierThresholdGet.bind(this))
 				.on('set', this.handleRelativeDehumidifierThresholdSet.bind(this))

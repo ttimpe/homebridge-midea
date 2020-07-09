@@ -450,16 +450,16 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				command = new ACSetCommand();
 				command.useFahrenheit = device.useFahrenheit
 				command.targetTemperature = device.targetTemperature;
-
+				command.swingMode = device.swingMode;
+				command.ecoMode = device.ecoMode
 			} else if (device.deviceType == MideaDeviceType.Dehumidifier) {
 				command = new DehumidifierSetCommand()
+				command.targetHumidity = device.targetHumidity
 			}
 			command.powerState = device.powerState;
-			command.swingMode = device.swingMode;
 			command.fanSpeed = device.fanSpeed;
 			command.operationalMode = device.operationalMode
 
-			command.ecoMode = device.ecoMode
 			//operational mode for workaround with fan only mode on device
 			const pktBuilder = new PacketBuilder();
 			pktBuilder.command = command;
