@@ -14,7 +14,7 @@ Add this to the platforms array in your config.json:
 	    "interval": 1,
 	    "devices": [
 	    	{
-	    		"deviceId": "DEVICE_ID"
+	    		"deviceId": "DEVICE_ID",
 	    		"supportedSwingMode": "Vertical",
 				"temperatureSteps": 1
 	    	}
