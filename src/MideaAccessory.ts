@@ -484,7 +484,7 @@ export class MideaAccessory {
 
 	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
-		callback(null, 1)
+		callback(null, this.operationalMode)
 	}
 	handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
 		this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
@@ -493,7 +493,7 @@ export class MideaAccessory {
 
 	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
-		callback(null, 1)
+		callback(null, this.operationalMode)
 	}
 
 	handleRelativeDehumidifierThresholdGet(callback: CharacteristicGetCallback) {
@@ -501,7 +501,9 @@ export class MideaAccessory {
 		callback(null, this.targetHumidity)
 	}
 	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
-		callback(null, value);
+		callback(null, this.targetHumidity);
+		this.targetHumidity = value
+		this.platform.sendUpdateToDevice(this);
 	}
 
 	handleRelativeHumidifierThresholdGet(callback: CharacteristicGetCallback) {
