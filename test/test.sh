@@ -1,8 +1,8 @@
 #!/bin/bash
 homebridge -D &
-sleep 10
+sleep 5
 which pgrep
-pgrep 'homebridge'
+pgrep homebridge
 if pgrep 'homebridge' >/dev/null
 then
 	echo "Homebrige is still running, success"
