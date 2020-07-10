@@ -2,7 +2,7 @@
 homebridge -D &
 sleep 10
 which pgrep
-ps aux | grep homebridge
+pgrep 'homebridge'
 if pgrep 'homebridge' >/dev/null
 then
 	echo "Homebrige is still running, success"
