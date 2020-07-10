@@ -1,6 +1,6 @@
 import crc8 from './crc8';
 
-import { MideaDeviceType } from './enums/MideaDeviceType'
+import { MideaDeviceType } from './enums/MideaDeviceType';
 
 export default class BaseCommand {
     data : any[]
@@ -11,7 +11,8 @@ export default class BaseCommand {
            this.data = [170, 35, 172, 0, 0, 0, 0, 0, 3, 2, 64, 67, 70, 102, 127, 127, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
         } else {
-            this.data = [90,90,1,0,89,0,32,0,1,0,0,0,39,36,17,9,13,10,18,20,218,73,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            // Made command one byte longer
+            this.data = [90,90,1,0,89,0,32,0,1,0,0,0,39,36,17,9,13,10,18,20,218,73,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         }
         
         this.data[0x02] = device_type;
