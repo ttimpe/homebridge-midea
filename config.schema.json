@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "homebridge-midea",
+  "pluginAlias": "midea",
   "pluginType": "platform",
   "singular": true,
   "headerDisplay": "",
