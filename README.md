@@ -1,5 +1,7 @@
 # homebridge-midea
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/TobiasTimpe) – In case you want to support my work :)
+
 Homebridge plugin to control Midea AC units. Still in early development.
 
 
