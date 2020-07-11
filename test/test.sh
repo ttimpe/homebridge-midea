@@ -3,7 +3,7 @@ homebridge -D &
 sleep 5
 which pgrep
 pgrep homebridge
-if pgrep 'homebridge' >/dev/null
+if pgrep -f 'homebridge' >/dev/null
 then
 	echo "Homebrige is still running, success"
 	pkill homebridge
