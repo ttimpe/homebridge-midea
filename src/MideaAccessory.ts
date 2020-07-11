@@ -75,6 +75,11 @@ export class MideaAccessory {
 
 
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
+			this.accessory.getService(this.platform.Service.AccessoryInformation)!
+			.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
+			.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
+			.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
+			.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
 		this.platform.getFirmwareVersionOfDevice(this).then(()=> {
 			this.platform.log.debug('Got firmware, setting version')
 			this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -171,7 +176,9 @@ export class MideaAccessory {
 				.on('get', this.handleCoolingThresholdTemperatureGet.bind(this))
 				.on('set', this.handleCoolingThresholdTemperatureSet.bind(this))
 				.setProps({
-					minStep: this.temperatureSteps
+					minStep: this.temperatureSteps,
+					minValue: 17,
+					maxValue: 35
 				});
 
 				this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
