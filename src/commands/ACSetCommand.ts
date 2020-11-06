@@ -1,6 +1,12 @@
 import SetCommand from '../SetCommand'
 import { MideaSwingMode } from '../enums/MideaSwingMode'
+import { MideaDeviceType } from '../enums/MideaDeviceType';
+
 export default class ACSetCommand extends SetCommand {
+   
+   constructor(device_type: MideaDeviceType = MideaDeviceType.AirConditioner) {
+        super(device_type);
+    }
 
     get audibleFeedback() {
         if (this.data[0x0b] & 0x42) {
@@ -13,8 +19,6 @@ export default class ACSetCommand extends SetCommand {
         this.data[0x0b] &= ~0x42; // Clear the audible bits
         this.data[0x0b] |= feedbackEnabled ? 0x42 : 0;
     }
-
-
 
 	 get targetTemperature() {
         return this.data[0x0c] & 0x1f;
@@ -76,9 +80,5 @@ export default class ACSetCommand extends SetCommand {
         this.data[0x11] &= ~0x0f; // Clear the mode bit
         this.data[0x11] |= mode & 0x0f;
     }
-
-  
-
-   
 
 }

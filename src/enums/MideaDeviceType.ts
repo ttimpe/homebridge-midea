@@ -39,7 +39,7 @@ export enum MideaDeviceType {
     ElectricFanner      = 0xFA,
     ElectricHeater      = 0xFB,
     AirPurifier         = 0xFC,
-    Humidiffer          = 0xFD,
+    Humidifier          = 0xFD,
     AirConditionFanner  = 0xFE,
     
     AllType             = 0xFF

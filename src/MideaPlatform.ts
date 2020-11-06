@@ -6,7 +6,6 @@ const traverse = require("traverse");
 const crypto = require("crypto");
 const https = require('https');
 
-
 const axios = require('axios').default
 
 const tunnel = require('tunnel');
@@ -32,12 +31,7 @@ import { MideaAccessory } from './MideaAccessory'
 import { MideaDeviceType } from './enums/MideaDeviceType'
 import { MideaErrorCodes } from './enums/MideaErrorCodes' 
 
-
-
-
-
 export class MideaPlatform implements DynamicPlatformPlugin {
-
 
 	public readonly Service: typeof Service = this.api.hap.Service;
 	public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
@@ -51,8 +45,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	apiClient: any;
 	public readonly accessories: PlatformAccessory[] = [];
 	mideaAccessories : MideaAccessory[] = []
-
-
 
 	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
 
@@ -334,41 +326,40 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 	}
 
 	updateValues() {
-		const header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
-
-
-		const data = header.concat(Constants.UpdateCommand);
-
+		const ac_header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
+		const dh_header = [90, 90, 1, 0, 89, 0, 32, 0, 1, 0, 0, 0, 39, 36, 17, 9, 13, 10, 18, 20, 218, 73, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+		let data = ac_header.concat(Constants.UpdateCommand);
 
 		this.accessories.forEach(async (accessory: PlatformAccessory) => {
 			// this.log.debug('current ma are ', this.mideaAccessories)
-			this.log.debug('update accessory',accessory.context.deviceId)
+			this.log.debug('update accessory', accessory.context.deviceId)
 			// this.log.debug(JSON.stringify(this.mideaAccessories))
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory === undefined) {
 				this.log.warn('Could not find accessory with id', accessory.context.deviceId)
 			} else {
 				try {
+					this.log.debug('Device type: ', mideaAccessory.deviceType)
 					if (mideaAccessory.deviceType == MideaDeviceType.AirConditioner) {
+						data = ac_header.concat(Constants.UpdateCommand);
 						const response = await this.sendCommand(mideaAccessory, data)
-						this.log.debug('Update successful')
+						this.log.debug('sent update command to AirConditioner')
 					} else if (mideaAccessory.deviceType == MideaDeviceType.Dehumidifier) {
-						
-						let updateCommand = [90, 90, 1, 0, 89, 0, 32, 0, 1, 0, 0, 0, 39, 36, 17, 9, 13, 10, 18, 20, 218, 73, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 170, 32, 161, 0, 0, 0, 0, 0, 3, 3, 65, 33, 0, 255, 3, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 36, 164, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-						const response = await this.sendCommand(mideaAccessory, updateCommand)
-						this.log.debug('sent update command to dehumidifier')
+						data = dh_header.concat(Constants.UpdateCommand_Dehumidifier);
+						const response = await this.sendCommand(mideaAccessory, data)
+						this.log.debug('sent update command to Dehumidifier')
 					}
 					
 				} catch (err) {
 					this.log.debug(err);
-					this.log.debug("Try to relogin");
+					this.log.debug("Error sending the update command, trying to relogin...");
 					try {
 						const loginResponse = await this.login();
-						this.log.debug("Login successful");
+						this.log.debug("re-login successful");
 						try {
 							const commandResponse = await this.sendCommand(mideaAccessory, data)
 						} catch (err) {
-							this.log.warn("update Command still failed after relogin");
+							this.log.warn("update command still failed after relogin");
 						}
 					} catch (err) {
 						this.log.warn("Login failed");

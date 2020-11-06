@@ -28,7 +28,7 @@ export class MideaAccessory {
 	public targetHumidity : number = 0
 	public waterLevel : number = 0
 	public userId: string = ''
-	public firmwareVersion: string = '0.0'
+	public firmwareVersion: string = '1.0.0'
 
 
 
@@ -75,22 +75,11 @@ export class MideaAccessory {
 
 
 		this.platform.log.debug('created device', this.name,'with id', this.deviceId, 'and type', this.deviceType)
-			this.accessory.getService(this.platform.Service.AccessoryInformation)!
-			.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
-			.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
-			.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
-			.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
-		this.platform.getFirmwareVersionOfDevice(this).then(()=> {
-			this.platform.log.debug('Got firmware, setting version')
-			this.accessory.getService(this.platform.Service.AccessoryInformation)!
-			.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
-			.setCharacteristic(this.platform.Characteristic.FirmwareRevision, this.firmwareVersion)
-			.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
-			.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
-		}).catch(() => {
-			this.platform.log.debug('Could not get firmware version');
-		})
-
+		this.accessory.getService(this.platform.Service.AccessoryInformation)!
+		.setCharacteristic(this.platform.Characteristic.Manufacturer, 'midea')
+		.setCharacteristic(this.platform.Characteristic.FirmwareRevision, '1.0.0')
+		.setCharacteristic(this.platform.Characteristic.Model, 'Air Conditioner')
+		.setCharacteristic(this.platform.Characteristic.SerialNumber, this.deviceId)
 
 		this.platform.log.debug("Device type is ", this.deviceType)
 		switch (this.deviceType) {
