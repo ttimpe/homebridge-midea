@@ -113,8 +113,11 @@ export class MideaAccessory {
 
 		switch (this.deviceType) {
 			case MideaDeviceType.Dehumidifier: {
+
 				this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity)
 					.on('get', this.handleCurrentRelativeHumidityGet.bind(this));
+				this.service.getCharacteristic(this.platform.Characteristic.TargetRelativeHumidity)
+					.on('set', this.handleTargetRelativeHumiditySet.bind(this))
 
 				this.service.getCharacteristic(this.platform.Characteristic.CurrentHumidifierDehumidifierState)
 					.on('get', this.handleCurrentHumidifierDehumidifierStateGet.bind(this))
@@ -457,10 +460,37 @@ export class MideaAccessory {
 
 	// HumidifierDehumidifier
 
+	// TODO implement Auto (should map to Smart mode) and HUMIDIFIER_OR_DEHUMIDIFIER/HUMIDIFIER/DEHUMIDIFIER (should map to Target mode) - do not map to dry (can't handle fan speed) or maybe play with pre-setting a fan speed combination
+	// From Homebridge:
+	// export declare class TargetHumidifierDehumidifierState extends Characteristic {
+	// 	/**
+	// 	 * @deprecated Removed in iOS 11. Use HUMIDIFIER_OR_DEHUMIDIFIER instead.
+	// 	 */
+	// 	static readonly AUTO = 0;
+	// 	static readonly HUMIDIFIER_OR_DEHUMIDIFIER = 0;
+	// 	static readonly HUMIDIFIER = 1;
+	// 	static readonly DEHUMIDIFIER = 2;
+	// 	static readonly UUID: string;
+	// 	constructor();
+	// }
+
 	handleCurrentRelativeHumidityGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Triggered GET CurrentRelativeHumidity')
+		this.platform.log.debug(`Triggered GET CurrentRelativeHumidity (currently set to ${this.currentHumidity})`)
 		callback(null, this.currentHumidity)
 	}
+	handleTargetRelativeHumiditySet(value: any, callback: CharacteristicSetCallback) {
+		this.platform.log.debug(`Triggered SET TargetRelativeHumidity (currently set to ${this.currentHumidity})`)
+		callback(null, this.targetHumidity);
+		this.targetHumidity = value
+		this.platform.sendUpdateToDevice(this);
+	}
+
+
+	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
+		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
+		callback(null, this.operationalMode)
+	}
+
 
 	handleTargetHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
 		this.platform.log.debug('Triggered GET TargetHumidifierDehumidifierState')
@@ -468,35 +498,36 @@ export class MideaAccessory {
 	}
 	handleTargetHumidifierDehumidifierStateSet(value: any, callback: CharacteristicSetCallback) {
 		this.platform.log.debug('Triggered SET TargetHumidifierDehumidifierState')
-		callback(null, value)
+		callback(null, this.operationalMode)
+		// this.operationalMode = value
+		// this.platform.sendUpdateToDevice(this);
 	}
 
-	handleCurrentHumidifierDehumidifierStateGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Triggered GET CurrentHumidifierDehumidifierState')
-		callback(null, this.operationalMode)
-	}
 
 	handleRelativeDehumidifierThresholdGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('returning target humidity of ', this.targetHumidity)
+		this.platform.log.debug('Triggered GET RelativeDehumidifierThreshold. Humidity:', this.targetHumidity)
 		callback(null, this.targetHumidity)
 	}
 	handleRelativeDehumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
+		this.platform.log.debug('Triggered SET RelativeDehumidifierThreshold. Target Humidity:', value);
 		callback(null, this.targetHumidity);
 		this.targetHumidity = value
 		this.platform.sendUpdateToDevice(this);
 	}
 
 	handleRelativeHumidifierThresholdGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('returning target humidity of ', this.targetHumidity)
+		this.platform.log.debug('Triggered GET RelativeHumidifierThreshold. Humidity:', this.targetHumidity)
 		callback(null, this.targetHumidity)
 	}
-
 	handleRelativeHumidifierThresholdSet(value: any, callback: CharacteristicSetCallback) {
-		callback(null, value);
+		this.platform.log.debug('Triggered SET RelativeHumidifierThreshold. Target Humidity:', value)
+		callback(null, this.targetHumidity);
+		this.targetHumidity = value
+		this.platform.sendUpdateToDevice(this);
 	}
 
 	handleWaterLevelGet(callback: CharacteristicGetCallback) {
-		this.platform.log.debug('Returning water level of', this.waterLevel)
+		this.platform.log.debug(`Triggered GET WaterLevel. WaterLevel: ${this.waterLevel}`)
 		callback(null, this.waterLevel)
 	}
 

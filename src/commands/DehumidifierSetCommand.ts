@@ -8,12 +8,21 @@ export default class DehumidifierSetCommand extends SetCommand {
 	}
 	
 	get targetHumidity() {
-		return this.data[0x07] & 127
+		return this.data[0x11] & 127
 	}
 
 	set targetHumidity(value: number) {
-		this.data[0x07] = value & 127
-		this.data[0x08] = 0 & 15
+		this.data[0x11] = value & 127
+		this.data[0x12] = 0 & 15
 	}
+
+	// TODO Idea:
+	// I can use the various Home App modes (Auto, Humi, Dehumi) to control the fan speed. 
+	// Or to switch between SMART/DRY/CONTINUOS/MANUAL?
+
+	// get operationalMode() {
+	// }
+	// set operationalMode(value: number) {
+	// }
 
 }

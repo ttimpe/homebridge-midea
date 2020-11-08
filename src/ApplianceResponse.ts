@@ -1,5 +1,4 @@
 import { MideaSwingMode } from './enums/MideaSwingMode'
-import { MideaOperationalMode } from './enums/MideaOperationalMode';
 
 export default class ApplianceResponse {
     data: any;

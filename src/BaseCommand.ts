@@ -14,10 +14,35 @@ export default class BaseCommand {
            this.data = [170, 35, 172, 0, 0, 0, 0, 0, 3, 2, 64, 67, 70, 102, 127, 127, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
            
         } else if (device_type == MideaDeviceType.Dehumidifier) {
-            this.data = [170, 34, 161, 0, 0, 0, 0, 0, 3, 2, 72, 67, 3, 208, 127, 127, 0, 50, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            this.data = [
+                // Command Header
+                170,            // 0         - ?
+                34,             // 1         - Lenght
+                161,            // 2         - Device Type (161 for Dehumidifier)
+                0, 0, 0, 0, 0,  // 3 to 7    - ?
+                3,              // 8         - ?
+                2,              // 9         - Command (2) or Query (3)
+                // Command Header End
+                // Data Start
+                72,             // 10 (0x0a) - Command type: Set (72), Query (65)
+                67,             // 11 (0x0b) - Settings (last bit likely turn on and off)
+                1,              // 12 (0x0c) - Mode (1: target, 2: continuous, 3: smart, 4: dry)
+                208,            // 13 (0x0d) - Timing + wind speed
+                127,            // 14 (0x0e) - Timer related?
+                127,            // 15 (0x0f) - Timer related?
+                0,              // 16 (0x10) - Timer related?
+                50,             // 17 (0x11) - Target humidity
+                0,              // 18 (0x12) - Target humidity (float)?
+                0,              // 19 (0x13) - Display and other settings
+                1,              // 20 (0x14) - Swing and other settings. In dehumidifier, matches mode
+                // Padding
+                0, 0, 0, 0, 0, 0, 0, 0, 0
+                // Data End
+            ];
+            
         } else {
-            // Unknown/Unsupported
-            this.data = [90, 90, 1, 0, 91, 0, 32, 0, 10, 0, 0, 0, 10, 10, 10, 3, 2, 11, 18, 20, 218, 73, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            // Unknown/Unsupported: default to AirCon
+            this.data = [170, 35, 172, 0, 0, 0, 0, 0, 3, 2, 64, 67, 70, 102, 127, 127, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         }
     }
 
