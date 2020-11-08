@@ -341,12 +341,19 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 1/2')
 					this.log.debug(`[updateValues] Sent update command to ${mideaAccessory.deviceType}`)
 				} catch (err) {
-					this.log.warn(`[updateValues] Error sending the command: ${err}. Retrying...`);
+					this.log.warn(`[updateValues] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
 					try {
-						await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 2/2')
-					} catch (err) {
-						this.log.error(`[updateValues] sendCommand command still failed after retrying: ${err}`);
+						const loginResponse = await this.login()
+						this.log.debug("[updateValues] Login successful!");
+						try {
+							await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 2/2')
+						} catch (err) {
+							this.log.error(`[updateValues] sendCommand command still failed after retrying: ${err}`);
+						}
+					} catch(err) {
+						this.log.error("[updateValues] re-login attempt failed");
 					}
+
 				}
 			}
 		});
@@ -382,12 +389,20 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				await this.sendCommand(device, data, '[sendUpdateToDevice] (set new params?) attempt 1/2')
 				this.log.debug('[sendUpdateToDevice] Sent update to device ' + device.name)
 			} catch (err) {
-				this.log.warn(`[sendUpdateToDevice] Error sending the command: ${err}. Retrying...`);
+				this.log.warn(`[sendUpdateToDevice] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
+				this.log.debug("[sendUpdateToDevice] Trying to re-login first");
 				try {
-					await this.sendCommand(device, data, '[sendUpdateToDevice]  (set new params?) attempt 2/2')
+					const loginResponse = await this.login();
+					this.log.debug("Login successful");
+					try {
+						await this.sendCommand(device, data, '[sendUpdateToDevice] (set new params?) attempt 2/2')
+					} catch (err) {
+						this.log.error(`[sendUpdateToDevice] sendCommand command still failed after retrying: ${err}`);
+					}
 				} catch (err) {
-					this.log.error(`[sendUpdateToDevice] sendCommand command still failed after retrying: ${err}`);
+					this.log.warn("[sendUpdateToDevice] re-login attempt failed");
 				}
+
 			}
 			//after sending, update because sometimes the api hangs
 			try {
