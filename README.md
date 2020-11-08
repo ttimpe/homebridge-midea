@@ -60,3 +60,8 @@ This version of ```homebridge-midea``` is a platform and should be able to acces
 
 ## Credits
 This plugin would not have been possible without the fundamentals that the Midea iobroker plugin and all of the other Midea API clients in Ruby and Python provided.
+
+
+## Development
+Make changes only on the `src` folder. To build, make sure you have TypeScript installed (already in the devDependencies of package.json) and run `tsc --build tsconfig.json`
+To deploy in homebridge, simply run `npm link` in this folder.
