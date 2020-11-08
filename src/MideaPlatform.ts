@@ -341,6 +341,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 					await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 1/2')
 					this.log.debug(`[updateValues] Sent update command to ${mideaAccessory.deviceType}`)
 				} catch (err) {
+					// TODO: this should be handled only on invalidSession error. Also all the retry logic could be done better (Promise retry instead of await?)
 					this.log.warn(`[updateValues] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
 					try {
 						const loginResponse = await this.login()
@@ -389,6 +390,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				await this.sendCommand(device, data, '[sendUpdateToDevice] (set new params?) attempt 1/2')
 				this.log.debug('[sendUpdateToDevice] Sent update to device ' + device.name)
 			} catch (err) {
+				// TODO: this should be handled only on invalidSession error. Also all the retry logic could be done better (Promise retry instead of await?)
 				this.log.warn(`[sendUpdateToDevice] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
 				this.log.debug("[sendUpdateToDevice] Trying to re-login first");
 				try {
