@@ -16,13 +16,4 @@ export default class DehumidifierSetCommand extends SetCommand {
 		this.data[0x08] = 0 & 15
 	}
 
-	get powerState() {
-		return this.data[0x0b] & 0x01;
-	}
-	
-	set powerState(state) {
-		this.data[0x0b] &= ~0x01; // Clear the power bit
-		this.data[0x0b] |= state ? 0x01 : 0;
-	}
-
 }

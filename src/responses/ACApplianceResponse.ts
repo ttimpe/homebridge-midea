@@ -1,7 +1,7 @@
 import ApplianceResponse from '../ApplianceResponse'
 
 export default class ACApplianceResponse extends ApplianceResponse {
-	    // Byte 0x02
+    // Byte 0x02
     get targetTemperature() {
         return (this.data[0x02] & 0xf) + 16;
     }

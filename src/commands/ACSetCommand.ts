@@ -3,8 +3,8 @@ import { MideaSwingMode } from '../enums/MideaSwingMode'
 import { MideaDeviceType } from '../enums/MideaDeviceType';
 
 export default class ACSetCommand extends SetCommand {
-   
-   constructor(device_type: MideaDeviceType = MideaDeviceType.AirConditioner) {
+
+    constructor(device_type: MideaDeviceType = MideaDeviceType.AirConditioner) {
         super(device_type);
     }
 
@@ -20,7 +20,7 @@ export default class ACSetCommand extends SetCommand {
         this.data[0x0b] |= feedbackEnabled ? 0x42 : 0;
     }
 
-	 get targetTemperature() {
+    get targetTemperature() {
         return this.data[0x0c] & 0x1f;
     }
 
@@ -29,7 +29,7 @@ export default class ACSetCommand extends SetCommand {
         this.data[0x0c] |= (temperatureCelsius & 0xf) | ((temperatureCelsius << 4) & 0x10);
     }
 
-	get turboMode() {
+    get turboMode() {
         return this.data[0x14] > 0;
     }
 
@@ -37,25 +37,24 @@ export default class ACSetCommand extends SetCommand {
         this.data[0x14] = turboModeEnabled ? 0x02 : 0;
     }
 
-   get useFahrenheit() {
-       if (this.data[0x14] & (1 << 2)) {
-           return true;
+    get useFahrenheit() {
+        if (this.data[0x14] & (1 << 2)) {
+            return true;
         } else {
             return false;
         }
-        return true;
     }
-    set useFahrenheit(useFahrenheit : boolean) {
-      // this.flipBitOfByte(this.data[0x14], 2)
-      var mask = 1 << 2
-      if (useFahrenheit == true) {
-         this.data[0x14] |= mask
+    set useFahrenheit(useFahrenheit: boolean) {
+        // this.flipBitOfByte(this.data[0x14], 2)
+        var mask = 1 << 2
+        if (useFahrenheit == true) {
+            this.data[0x14] |= mask
 
-      } else {
-          this.data[0x14] &= ~mask;
-      }
-     }
-      
+        } else {
+            this.data[0x14] &= ~mask;
+        }
+    }
+
     get fanSpeed() {
         return this.data[0x0d];
     }

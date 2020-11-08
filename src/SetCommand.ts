@@ -1,6 +1,5 @@
 import BaseCommand from './BaseCommand';
 import { MideaDeviceType } from './enums/MideaDeviceType'
-import { MideaOperationalMode } from './enums/MideaOperationalMode'
 import { MideaSwingMode } from './enums/MideaSwingMode'
 
 export default class SetCommand extends BaseCommand {
