@@ -1,6 +1,5 @@
 // Utils – Utility functions
-const crypto = require("crypto");
-
+import crypto from "crypto";
 import Constants from './Constants'
 
 
@@ -71,25 +70,24 @@ export default class Utils {
 		}
 	}
 
-	static decryptAes(reply: number[], dataKey: string) {
+	static decryptAes(reply: string, dataKey: string) {
 		if (reply && dataKey != '') {
 			const decipher = crypto.createDecipheriv("aes-128-ecb", dataKey, "");
 			const dec = decipher.update(reply, "hex", "utf8");
-			return dec.split(",");
+			return dec.split(",").map(Number);
 		} else {
-			return false;
+			return [];
 		}
 	}
-	static decryptAesString(reply: number[], dataKey : string) {
+	static decryptAesString(reply: string, dataKey : string) {
 		if (reply && dataKey != '') {
 			const decipher = crypto.createDecipheriv("aes-128-ecb", dataKey, "");
 			const dec = decipher.update(reply, "hex", "utf8");
 			return dec;
 		} else {
-			return false;
+			return '';
 		}
 	}
-
 
 	static encryptAes(query: number[], dataKey : string) {
 		if (query && dataKey != '') {
@@ -117,7 +115,7 @@ export default class Utils {
 			const pw = crypto.createHash("sha256").update(password).digest("hex");
 			return crypto.createHash("sha256").update(loginId + pw + Constants.AppKey).digest("hex");
 		} else {
-			return false;
+			return '';
 		}
 	}
 	static generateDataKey(accessToken: string) {
@@ -127,7 +125,7 @@ export default class Utils {
 			const dec = decipher.update(accessToken, "hex", "utf8");
 			return dec;
 		}
-		return false;
+		return '';
 	}
 
 
