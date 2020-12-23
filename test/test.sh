@@ -1,9 +1,9 @@
 #!/bin/bash
 homebridge -D &
-sleep 10
+sleep 5
 which pgrep
-ps aux | grep homebridge
-if pgrep 'homebridge' >/dev/null
+pgrep homebridge
+if pgrep -f 'homebridge' >/dev/null
 then
 	echo "Homebrige is still running, success"
 	pkill homebridge

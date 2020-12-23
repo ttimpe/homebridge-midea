@@ -1,6 +1,8 @@
+import { MideaSwingMode } from './enums/MideaSwingMode'
+
 export default class ApplianceResponse {
     data: any;
-    constructor(data :any) {
+    constructor(data: any) {
         // The response data from the appliance includes a packet header which we don't want
         this.data = data.slice(0x32);
     }
@@ -22,22 +24,17 @@ export default class ApplianceResponse {
         return (this.data[0x01] & 0x80) > 0;
     }
 
-    // Byte 0x02
-    get targetTemperature() {
-        return (this.data[0x02] & 0xf) + 16;
-    }
-
-    get operationalMode() : number {
+    get operationalMode(): number {
         return (this.data[0x02] & 0xe0) >> 5;
     }
 
     // Byte 0x03
-    get fanSpeed() : number {
+    get fanSpeed(): number {
         return this.data[0x03] & 0x7f;
     }
 
     // Byte 0x04 + 0x06
-    get onTimer() : any {
+    get onTimer(): any {
         const on_timer_value = this.data[0x04];
         const on_timer_minutes = this.data[0x06];
         return {
@@ -48,7 +45,7 @@ export default class ApplianceResponse {
     }
 
     // Byte 0x05 + 0x06
-    get offTimer() : any {
+    get offTimer(): any {
         const off_timer_value = this.data[0x05];
         const off_timer_minutes = this.data[0x06];
         return {
@@ -59,16 +56,16 @@ export default class ApplianceResponse {
     }
 
     // Byte 0x07
-    get swingMode() : any {
+    get swingMode(): MideaSwingMode {
         return this.data[0x07] & 0x0f;
     }
 
     // Byte 0x08
-    get cozySleep() : any {
+    get cozySleep(): any {
         return this.data[0x08] & 0x03;
     }
 
-    get save() : any {
+    get save(): any {
         // This needs a better name, dunno what it actually means
         return (this.data[0x08] & 0x08) > 0;
     }
@@ -97,12 +94,9 @@ export default class ApplianceResponse {
 
     get dryClean() {
         // This actually means 13°C(55°F)~35°C(95°F) according to my manual. Also dehumidifying.
-		return (this.data[0x09] & 0x04) > 0;
+        return (this.data[0x09] & 0x04) > 0;
     }
 
-    get auxHeat() {
-        return (this.data[0x09] & 0x08) > 0;
-    }
 
     get ecoMode() {
         return (this.data[0x09] & 0x10) > 0;
@@ -113,10 +107,7 @@ export default class ApplianceResponse {
         return (this.data[0x09] & 0x20) > 0;
     }
 
-    get tempUnit() {
-        // This needs a better name, dunno what it actually means
-        return this.data[23] > 0;
-    }
+
 
     // Byte 0x0a
     get sleepFunction() {
@@ -127,10 +118,6 @@ export default class ApplianceResponse {
         return (this.data[0x0a] & 0x02) > 0;
     }
 
-    get catchCold() {
-        // This needs a better name, dunno what it actually means
-        return (this.data[0x0a] & 0x08) > 0;
-    }
 
     get nightLight() {
         // This needs a better name, dunno what it actually means
@@ -147,18 +134,12 @@ export default class ApplianceResponse {
         return (this.data[0x0a] & 0x40) > 0;
     }
 
-    // Byte 0x0b
-    get indoorTemperature() {
-        return (this.data[0x0b] - 50) / 2.0;
-    }
-
-    // Byte 0x0c
-    get outdoorTemperature() {
-        return (this.data[0x0c] - 50) / 2.0;
-    }
-
-    // Byte 0x0d
-    get humidity() {
-        return this.data[0x0d] & 0x7f;
-    }
+    /*
+    
+        // Byte 0x0d
+        get humidity() {
+            return this.data[0x0d] & 0x7f;
+        }
+    
+        */
 }

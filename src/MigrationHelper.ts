@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 import { Logger } from 'homebridge'
 
@@ -15,7 +15,7 @@ export class MigrationHelper {
 		if (fs.existsSync(configFilePath)) {
 			this.configFilePath = configFilePath
 			let file = fs.readFileSync(configFilePath)
-			let config = JSON.parse(file)
+			let config = JSON.parse(file.toString())
 			let migratedConfig = this.migrate(config);
 			if (migratedConfig) {
 				this.backupConfig();

@@ -1,51 +1,73 @@
 import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
 
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
-const request = require("request");
-const traverse = require("traverse");
-const crypto = require("crypto");
+const axios = require('axios').default
+
+import tunnel from 'tunnel';
+
+const axiosCookieJarSupport = require('axios-cookiejar-support').default;
+import tough from 'tough-cookie';
+
+import qs from 'querystring';
 
 import Utils from './Utils'
 import Constants from './Constants'
-import ApplianceResponse from './ApplianceResponse'
-import SetCommand from './SetCommand'
+
 import PacketBuilder from './PacketBuilder'
 
+import ACSetCommand from './commands/ACSetCommand';
+import DehumidifierSetCommand from './commands/DehumidifierSetCommand';
+
+import ACApplianceResponse from './responses/ACApplianceResponse'
+import DehumidifierApplianceResponse from './responses/DehumidifierApplianceResponse'
+
 import { MideaAccessory } from './MideaAccessory'
-import { MideaDeviceType } from './MideaDeviceType'
-import { MideaErrorCodes } from './MideaErrorCodes' 
-
-
-
-
+import { MideaDeviceType } from './enums/MideaDeviceType'
 
 export class MideaPlatform implements DynamicPlatformPlugin {
 
-
 	public readonly Service: typeof Service = this.api.hap.Service;
 	public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
-	jar : any
-	updateInterval :any = null
-	reauthInterval :any = null
+	jar: any
+	updateInterval: any = null
+	reauthInterval: any = null
 	atoken: string = ''
 	sessionId: string = ''
-	dataKey : string = ''
-	baseHeader : object
+	dataKey: string = ''
+	baseHeader: object
+	apiClient: any;
 	public readonly accessories: PlatformAccessory[] = [];
-	mideaAccessories : MideaAccessory[] = []
+	mideaAccessories: MideaAccessory[] = []
 
-	// service: any
-	//  fanService: any
-	// informationService : any
+	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api: API) {
 
-	constructor(public readonly log: Logger, public readonly config: PlatformConfig, public readonly api : API) {
+		axiosCookieJarSupport(axios);
+		this.jar = new tough.CookieJar()
+		let agent: any;
+		if (this.config.proxy) {
+			this.log.info('Using debugging proxy specified in config.json')
+			const agent = tunnel.httpsOverHttp({
+				proxy: this.config.proxy
+			})
+			this.apiClient = axios.create({
+				baseURL: 'https://mapp.appsmb.com/v1',
+				headers: {
+					'User-Agent': Constants.UserAgent,
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				jar: this.jar,
+				httpsAgent: agent
+			})
+		} else {
+			this.apiClient = axios.create({
+				baseURL: 'https://mapp.appsmb.com/v1',
+				headers: {
+					'User-Agent': Constants.UserAgent,
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+				jar: this.jar
+			})
+		}
 
-		this.jar = request.jar();
-
-
-
-		this.baseHeader = { 'User-Agent': Constants.UserAgent }
 		this.log = log;
 		this.config = config;
 		api.on('didFinishLaunching', () => {
@@ -55,26 +77,29 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 
 
 	async onReady() {
-		this.login().then(() => {
-			this.log.debug("Login successful");
-			this.getUserList().then(() => {
-				this.updateValues();
-			}).catch(() => {
-				this.log.debug("Get Devices failed");
-			});
+		try {
+			await this.login()
+			this.log.debug('Login successful')
+			try {
+				await this.getUserList()
+				this.updateValues()
+			} catch (err) {
+				this.log.debug('getUserList failed')
+			}
 			this.updateInterval = setInterval(() => {
 				this.updateValues();
 			}, this.config['interval'] * 60 * 1000);
-		}).catch(() => {
-			this.log.debug("Login failed");
-		});
-	}
-	login() {
-		return new Promise((resolve, reject) => {
-			this.jar = request.jar();
-			const url = "https://mapp.appsmb.com/v1/user/login/id/get";
+		} catch (err) {
+			this.log.debug('Login failed')
+		}
 
-			const form : any = {
+	}
+
+	async login() {
+		return new Promise(async (resolve, reject) => {
+			const url = '/user/login/id/get';
+
+			const form: any = {
 				loginAccount: this.config['user'],
 				clientType: Constants.ClientType,
 				src: Constants.RequestSource,
@@ -83,139 +108,87 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 				stamp: Utils.getStamp(),
 				language: Constants.Language
 			};
-			const sign = this.getSign(url, form);
+			const sign = Utils.getSign(url, form);
 			form.sign = sign;
+			//this.log.debug('login request', qs.stringify(form));
 
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				json: true,
-				form: form,
-				jar: this.jar,
-				gzip: true
-			},
-			(err :any, resp :any, body :any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to login");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject();
-					return;
-				}
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					this.log.debug(body.msg);
-					this.log.debug(body.errorCode);
-					reject();
-					return;
-				}
-				if (body.result) {
-					const loginId :string = body.result.loginId;
-					const password : string = this.getSignPassword(loginId);
-					const url = "https://mapp.appsmb.com/v1/user/login";
-					const form :any = {
-						loginAccount: this.config['user'],
-						src: Constants.RequestSource,
-						format: Constants.RequestFormat,
-						stamp: Utils.getStamp(),
-						language: Constants.Language,
-						password: password,
-						clientType: Constants.ClientType,
-						appId: Constants.AppId,
-					};
+			try {
+				const response = await this.apiClient.post(url, qs.stringify(form))
 
-					const sign = this.getSign(url, form);
-					form.sign = sign;
+				if (response.data) {
 
-					request.post(
-					{
-						url: url,
-						headers: this.baseHeader,
-						followAllRedirects: true,
-						json: true,
-						form: form,
-						jar: this.jar,
-						gzip: true,
-					},
+					if (response.data.errorCode && response.data.errorCode != '0') {
+						this.log.debug('Login request failed with error', response.data.msg)
+					} else {
 
-					(err: any, resp: any, body: any) => {
-						if (err || (resp && resp.statusCode >= 400) || !body) {
-							this.log.debug("Failed to login");
-							err && this.log.debug(err);
-							body && this.log.debug(JSON.stringify(body));
-							resp && this.log.debug(resp.statusCode);
+						const loginId: string = response.data.result.loginId;
+						const password: string = Utils.getSignPassword(loginId, this.config.password);
+						const url = "/user/login";
+						const form: any = {
+							loginAccount: this.config['user'],
+							src: Constants.RequestSource,
+							format: Constants.RequestFormat,
+							stamp: Utils.getStamp(),
+							language: Constants.Language,
+							password: password,
+							clientType: Constants.ClientType,
+							appId: Constants.AppId,
+						};
+
+						const sign = Utils.getSign(url, form);
+						form.sign = sign;
+						try {
+							const loginResponse = await this.apiClient.post(url, qs.stringify(form));
+
+							//this.log.debug(response);
+							if (loginResponse.data.errorCode && loginResponse.data.errorCode != '0') {
+								this.log.debug('Login request 2 returned error', loginResponse.data.msg);
+								reject();
+							} else {
+								this.atoken = loginResponse.data.result.accessToken;
+								this.sessionId = loginResponse.data.result.sessionId;
+								this.dataKey = Utils.generateDataKey(this.atoken);
+								resolve();
+							}
+						} catch (err) {
+							this.log.debug('Login request 2 failed with', err)
 							reject();
-							return;
 						}
+					}
 
-						this.log.debug(JSON.stringify(body));
-						if (body.errorCode && body.errorCode !== "0") {
-							this.log.debug(body.msg);
-							this.log.debug(body.errorCode);
-							reject();
-							return;
-						}
-						if (body.result) {
-							this.atoken = body.result.accessToken;
-							this.sessionId = body.result.sessionId;
-							this.generateDataKey();
-							resolve();
-						}
-					});
 				}
-			});
+
+			} catch (err) {
+				this.log.debug('Login request failed with', err);
+				reject();
+			}
 		});
 	}
-	getUserList() {
+
+	async getUserList() {
 		this.log.debug('getUserList called');
-		return new Promise((resolve, reject) => {
-			const form :any = {
+		return new Promise(async (resolve, reject) => {
+			const form: any = {
 				src: Constants.RequestSource,
 				format: Constants.RequestFormat,
 				stamp: Utils.getStamp(),
 				language: Constants.Language,
 				sessionId: this.sessionId
 			};
-			const url = "https://mapp.appsmb.com/v1/appliance/user/list/get";
-			const sign = this.getSign(url, form);
+			const url = "/appliance/user/list/get";
+			const sign = Utils.getSign(url, form);
 			form.sign = sign;
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				json: true,
-				form: form,
-				jar: this.jar,
-				gzip: true,
-			},
-			(err: any, resp: any, body: any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to login");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject();
-					return;
-				}
+			try {
+				const response = await this.apiClient.post(url, qs.stringify(form))
 
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					this.log.debug(body.msg);
-					this.log.debug(body.errorCode);
+				if (response.data.errorCode && response.data.errorCode != '0') {
+					this.log.error('getUserList returned error', response.data.msg);
 					reject();
-					return;
-				}
-				try {
-					if (body.result && body.result.list && body.result.list.length > 0) {
-						this.log.debug('getUserList result is', body.result);
-						body.result.list.forEach(async (currentElement: any) => {
+				} else {
+					if (response.data.result && response.data.result.list && response.data.result.list.length > 0) {
+						response.data.result.list.forEach(async (currentElement: any) => {
 							if (parseInt(currentElement.type) == MideaDeviceType.AirConditioner || parseInt(currentElement.type) == MideaDeviceType.Dehumidifier) {
 								const uuid = this.api.hap.uuid.generate(currentElement.id)
-
 								const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid)
 
 								if (existingAccessory) {
@@ -233,7 +206,6 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 									accessory.context.deviceId = currentElement.id
 									accessory.context.name = currentElement.name
 									accessory.context.deviceType = parseInt(currentElement.type)
-
 									var ma = new MideaAccessory(this, accessory, currentElement.id, parseInt(currentElement.type), currentElement.name, currentElement.userId)
 									this.api.registerPlatformAccessories('homebridge-midea', 'midea', [accessory])
 
@@ -244,384 +216,211 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 								this.log.warn('Device ' + currentElement.name + ' is of unsupported type ' + MideaDeviceType[parseInt(currentElement.type)])
 								this.log.warn('Please open an issue on GitHub with your specific device model')
 							}
-
 						});
+						resolve();
+
+					} else {
+						this.log.error('getUserList invalid response');
+						reject();
 					}
-					resolve();
-				} catch (error) {
-					this.log.debug(error);
-					this.log.debug(error.stack);
-					reject();
 				}
+
+			} catch (err) {
+				this.log.debug('getUserList error', err);
+				reject();
 			}
-			);
+
 		});
 	}
-	sendCommand(device
-		: MideaAccessory, order: any) {
-		if (device) {
-			return new Promise((resolve, reject) => {
-				const orderEncode = Utils.encode(order);
-				const orderEncrypt = this.encryptAes(orderEncode);
 
-				const form :any = {
+	async sendCommand(device: MideaAccessory, order: any, intent: string) {
+		return new Promise(async (resolve, reject) => {
+			if (device) {
+				const orderEncode = Utils.encode(order);
+				const orderEncrypt = Utils.encryptAes(orderEncode, this.dataKey);
+
+				const form: any = {
 					applianceId: device.deviceId,
 					src: Constants.RequestSource,
-					format:	Constants.RequestFormat,
+					format: Constants.RequestFormat,
 					funId: "FC02", //maybe it is also "0000"
 					order: orderEncrypt,
 					stamp: Utils.getStamp(),
 					language: Constants.Language,
 					sessionId: this.sessionId,
 				};
-				const url = "https://mapp.appsmb.com/v1/appliance/transparent/send";
-				const sign = this.getSign(url, form);
+
+				const url = "/appliance/transparent/send";
+				const sign = Utils.getSign(url, form);
 				form.sign = sign;
-				request.post(
-				{
-					url: url,
-					headers: this.baseHeader,
-					followAllRedirects: true,
-					json: true,
-					form: form,
-					jar: this.jar,
-					gzip: true,
-				},
-				(err: any, resp: any, body: any) => {
-					if (err || (resp && resp.statusCode >= 400) || !body) {
-						this.log.debug("Failed to send command");
-						err && this.log.debug(err);
-						body && this.log.debug(JSON.stringify(body));
-						resp && this.log.debug(resp.statusCode);
-						reject(err);
-						return;
-					}
 
-					this.log.debug(JSON.stringify(body));
-					if (body.errorCode && body.errorCode !== "0") {
-						if (body.errorCode == MideaErrorCodes.DeviceUnreachable) {
-							this.log.debug("Cannot reach " + device.deviceId + " " + body.msg);
+				//this.log.debug('sendCommand request', qs.stringify(form));
+				try {
+					const response = await this.apiClient.post(url, qs.stringify(form))
 
-							resolve();
-							return;
+					if (response.data.errorCode && response.data.errorCode != '0') {
+						this.log.error(`[MideaPlatform.ts] sendCommand (Intent: ${intent}) returned error ${response.data.msg}`)
+						reject();
+					} else {
+						this.log.debug(`[MideaPlatform.ts] sendCommand (Intent: ${intent}) success!`);
+						let applianceResponse: any
+						if (device.deviceType == MideaDeviceType.AirConditioner) {
+							applianceResponse = new ACApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
+							device.targetTemperature = applianceResponse.targetTemperature;
+							device.indoorTemperature = applianceResponse.indoorTemperature;
+							device.useFahrenheit = applianceResponse.tempUnit
+							device.swingMode = applianceResponse.swingMode;
+
+							this.log.debug('[AirConditioner] useFahrenheit is set to', applianceResponse.tempUnit)
+							this.log.debug('[AirConditioner] ecoMode is set to', applianceResponse.ecoMode)
+							this.log.debug('[AirConditioner] Target temperature', applianceResponse.targetTemperature);
+
+						} else if (device.deviceType == MideaDeviceType.Dehumidifier) {
+							applianceResponse = new DehumidifierApplianceResponse(Utils.decode(Utils.decryptAes(response.data.result.reply, this.dataKey)));
+							device.currentHumidity = applianceResponse.currentHumidity
+							this.log.debug('[Dehumidifier] Current Humidity is', device.currentHumidity)
+							device.targetHumidity = applianceResponse.targetHumidity
+							this.log.debug('[Dehumidifier] Target humidity is set to', device.targetHumidity)
+							device.waterLevel = applianceResponse.waterLevel;
+							this.log.debug('[Dehumidifier] Water level is at', device.waterLevel)
+
 						}
-						if (body.errorCode == MideaErrorCodes.CommandNotAccepted) {
-							this.log.debug("Command was not accepted by device. Command wrong or device not reachable " + device.deviceId + " " + body.msg);
+						// Common to all devices
+						device.fanSpeed = applianceResponse.fanSpeed;
+						device.powerState = applianceResponse.powerState ? 1 : 0
+						device.operationalMode = applianceResponse.operationalMode;
+						device.ecoMode = applianceResponse.ecoMode
 
-							resolve();
-							return;
-						}
-						this.log.debug("Sending failed device returns an error");
-						this.log.debug(body.errorCode);
-						this.log.debug(body.msg);
-						reject(body.msg);
-						return;
-					}
-					try {
-						this.log.debug("send successful");
+						this.log.debug('fanSpeed is set to', applianceResponse.fanSpeed);
+						this.log.debug('swingMode is set to', applianceResponse.swingMode);
+						this.log.debug('powerState is set to', applianceResponse.powerState);
+						this.log.debug('operational mode is set to', applianceResponse.operationalMode);
 
-						const response :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
-						const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-
-						this.log.debug('target temperature', response.targetTemperature);
-
-						device.targetTemperature = response.targetTemperature;
-						device.indoorTemperature = response.indoorTemperature;
-						device.fanSpeed = response.fanSpeed;
-						device.powerState = response.powerState ? 1 : 0
-						device.swingMode = response.swingMode;
-						device.operationalMode = response.operationalMode;
-						device.humidty = response.humidity
-						device.useFahrenheit = response.tempUnit
-						this.log.debug('fanSpeed is set to', response.fanSpeed);
-						this.log.debug('swingMode is set to', response.swingMode);
-						this.log.debug('powerState is set to', response.powerState);
-						this.log.debug('operational mode is set to', response.operationalMode);
-						this.log.debug('useFahrenheit is set to', response.tempUnit)
-
-						this.log.debug('Full data is', Utils.formatResponse(response.data))
+						this.log.debug('Full data is', Utils.formatResponse(applianceResponse.data))
 
 						resolve();
-					} catch (error) {
-						this.log.debug(body);
-						this.log.debug(error);
-
-						this.log.debug(error.stack);
-						reject();
 					}
+
+				} catch (err) {
+					this.log.error(`[MideaPlatform.ts] sendCommand (Intent: ${intent}) request failed ${err}`);
+					reject();
+
 				}
-				);
-			});
-		} else {
-			this.log.debug('No device specified')
-		}
-	}
-	getSign(path: string, form: any) {
-		let postfix = "/" + path.split("/").slice(3).join("/");
-		// Maybe this will help, should remove any query string parameters in the URL from the sign
-		postfix = postfix.split('?')[0]
-		const ordered : any = {};
-		Object.keys(form)
-		.sort()
-		.forEach(function (key: any) {
-			ordered[key] = form[key];
+			} else {
+				this.log.error('No device specified');
+				reject();
+			}
 		});
-		const query = Object.keys(ordered)
-		.map((key) => key + "=" + ordered[key])
-		.join("&");
-
-		return crypto
-		.createHash("sha256")
-		.update(postfix + query + Constants.AppKey)
-		.digest("hex");
-	}
-	getSignPassword(loginId: string) {
-		const pw = crypto.createHash("sha256").update(this.config.password).digest("hex");
-
-		return crypto
-		.createHash("sha256")
-		.update(loginId + pw + Constants.AppKey)
-		.digest("hex");
-	}
-
-
-	generateDataKey() {
-		const md5AppKey = crypto.createHash("md5").update(Constants.AppKey).digest("hex");
-		const decipher = crypto.createDecipheriv("aes-128-ecb", md5AppKey.slice(0, 16), "");
-		const dec = decipher.update(this.atoken, "hex", "utf8");
-		this.dataKey = dec;
-		return dec;
-	}
-	decryptAes(reply: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const decipher = crypto.createDecipheriv("aes-128-ecb", this.dataKey, "");
-		const dec = decipher.update(reply, "hex", "utf8");
-		return dec.split(",");
-	}
-	decryptAesString(reply: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const decipher = crypto.createDecipheriv("aes-128-ecb", this.dataKey, "");
-		const dec = decipher.update(reply, "hex", "utf8");
-		return dec;
-	}
-
-
-	encryptAes(query: number[]) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query.join(","), "utf8", "hex");
-		ciph += cipher.final("hex");
-		return ciph;
-	}
-	encryptAesString(query: string) {
-		if (!this.dataKey) {
-			this.generateDataKey();
-		}
-		const cipher = crypto.createCipheriv("aes-128-ecb", this.dataKey, "");
-		let ciph = cipher.update(query, "utf8", "hex");
-		ciph += cipher.final("hex");
-		return ciph;
 	}
 
 	updateValues() {
-		const header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
+		// STATUS ONLY OR POWER ON/OFF HEADER
+		const ac_data_header = [90, 90, 1, 16, 89, 0, 32, 0, 80, 0, 0, 0, 169, 65, 48, 9, 14, 5, 20, 20, 213, 50, 1, 0, 0, 17, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0];
+		const dh_data_header = [90, 90, 1, 0, 89, 0, 32, 0, 1, 0, 0, 0, 39, 36, 17, 9, 13, 10, 18, 20, 218, 73, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+		let data: number[] = []
 
-
-		const data = header.concat(Constants.UpdateCommand);
-
-
-		this.accessories.forEach((accessory: PlatformAccessory) => {
-			this.log.debug('update accessory',accessory.context.deviceId)
+		this.accessories.forEach(async (accessory: PlatformAccessory) => {
 			// this.log.debug('current ma are ', this.mideaAccessories)
+			this.log.debug('Updating accessory', accessory.context.deviceId)
+			// this.log.debug(JSON.stringify(this.mideaAccessories))
 			let mideaAccessory = this.mideaAccessories.find(ma => ma.deviceId == accessory.context.deviceId)
 			if (mideaAccessory === undefined) {
-				this.log.debug('Could not find accessory with id', accessory.context.deviceId)
-				
+				this.log.warn('Could not find accessory with id', accessory.context.deviceId)
 			} else {
-				this.sendCommand(mideaAccessory, data)
-				.then(() => {
-					this.log.debug("Update successful");
-				})
-				.catch((error) => {
-					this.log.debug(error);
-					this.log.debug("Try to relogin");
-					this.login()
-					.then(() => {
-						this.log.debug("Login successful");
 
-						this.sendCommand(mideaAccessory, data).catch((error) => {
-							this.log.debug("update Command still failed after relogin");
-						});
-					})
-					.catch(() => {
-						this.log.debug("Login failed");
-					});
-				});
-			}
-		});
-
-	}
-
-	manualFormEncode(form: any) {
-		const ordered : any = {};
-		Object.keys(form)
-		.sort()
-		.forEach(function (key: any) {
-			ordered[key] = form[key];
-		});
-		const query = Object.keys(ordered)
-		.map((key) => key + "=" + ordered[key])
-		.join("&");
-		return query;
-
-	}
-
-	getFirmwareVersionOfDevice(device: MideaAccessory) {
-		let requestObject : object = {
-			applianceId: device.deviceId,
-			userId: device.userId
-		};
-		let data = this.encryptAesString(JSON.stringify(requestObject))
-
-		this.log.debug('encrypted string is', data);
-		this.log.debug(JSON.stringify(requestObject))
-		return new Promise((resolve, reject) => {
-
-			const form :any = {
-				appId: Constants.AppId,
-				data: data,
-				format: Constants.RequestFormat,
-				language: Constants.Language,
-				protoType: '0x01',
-				serviceUrl: '/ota/version',
-				sessionId: this.sessionId,
-				src: Constants.RequestSource,
-				stamp: Utils.getStamp()
-			};
-			const url = "https://mapp.appsmb.com/v1/app2base/data/transmit?serviceUrl=/ota/version";
-			const sign = this.getSign(url, form);
-
-			form.sign = sign;
-
-			this.log.debug('we are sending the following form', form)
-			request.post(
-			{
-				url: url,
-				headers: this.baseHeader,
-				followAllRedirects: true,
-				form: form,
-				jar: this.jar,
-				gzip: true,
-				json: true
-
-			}, (err: any, resp: any, body: any) => {
-				if (err || (resp && resp.statusCode >= 400) || !body) {
-					this.log.debug("Failed to send command");
-					err && this.log.debug(err);
-					body && this.log.debug(JSON.stringify(body));
-					resp && this.log.debug(resp.statusCode);
-					reject(err);
-					return;
+				// Setup the data payload based on deviceType
+				if (mideaAccessory.deviceType == MideaDeviceType.AirConditioner) {
+					data = ac_data_header.concat(Constants.UpdateCommand_AirCon);
+				} else if (mideaAccessory.deviceType == MideaDeviceType.Dehumidifier) {
+					data = dh_data_header.concat(Constants.UpdateCommand_Dehumidifier);
 				}
-				this.log.debug(JSON.stringify(body));
-				if (body.errorCode && body.errorCode !== "0") {
-					if (body.errorCode == MideaErrorCodes.DeviceUnreachable) {
-						this.log.debug("Cannot reach " + device.deviceId + " " + body.msg);
-						resolve();
-						return;
-					}
-					if (body.errorCode == MideaErrorCodes.CommandNotAccepted) {
-						this.log.debug("Command was not accepted by device. Command wrong or device not reachable " + device.deviceId + " " + body.msg);
-						resolve();
-						return;
-					}
-					this.log.debug("Sending failed device returns an error");
-					this.log.debug(body.errorCode);
-					this.log.debug(body.msg);
-					reject(body.msg);
-					return;
-				}
+
+				this.log.debug(`[updateValues] Command + Header: ${data}`)
+
 				try {
+					await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 1/2')
+					this.log.debug(`[updateValues] Sent update command to ${mideaAccessory.deviceType}`)
+				} catch (err) {
+					// TODO: this should be handled only on invalidSession error. Also all the retry logic could be done better (Promise retry instead of await?)
+					this.log.warn(`[updateValues] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
+					try {
+						const loginResponse = await this.login()
+						this.log.debug("[updateValues] Login successful!");
+						try {
+							await this.sendCommand(mideaAccessory, data, '[updateValues] (fetch params?) attempt 2/2')
+						} catch (err) {
+							this.log.error(`[updateValues] sendCommand command still failed after retrying: ${err}`);
+						}
+					} catch(err) {
+						this.log.error("[updateValues] re-login attempt failed");
+					}
 
-					let decryptedString = this.decryptAesString(body.result.returnData)
-					this.log.debug('Got firmware response', decryptedString)
-					let responseObject = JSON.parse(decryptedString)
-					device.firmwareVersion = responseObject.result.version
-					this.log.debug('got firmware version', device.firmwareVersion)
-
-					
-				/*
-					this.log.debug("send successful");
-					const response :ApplianceResponse = new ApplianceResponse(Utils.decode(this.decryptAes(body.result.reply)));
-					const properties = Object.getOwnPropertyNames(ApplianceResponse.prototype).slice(1);
-					this.log.debug('target temperature', response.targetTemperature);
-
-					device.targetTemperature = response.targetTemperature;
-					device.indoorTemperature = response.indoorTemperature;
-					device.fanSpeed = response.fanSpeed;
-					device.powerState = response.powerState ? 1 : 0
-					device.swingMode = response.swingMode;
-					device.operationalMode = response.operationalMode;
-					device.humidty = response.humidity
-					device.useFahrenheit = response.tempUnit
-					this.log.debug('fanSpeed is set to', response.fanSpeed);
-					this.log.debug('swingMode is set to', response.swingMode);
-					this.log.debug('powerState is set to', response.powerState);
-					this.log.debug('operational mode is set to', response.operationalMode);
-					*/
-					resolve();
-				} catch (error) {
-					this.log.debug(body);
-					this.log.debug(error);
-					this.log.debug(error.stack);
-					reject();
 				}
 			}
-			);
 		});
 	}
 
-	sendUpdateToDevice(device?: MideaAccessory) {
+	async sendUpdateToDevice(device?: MideaAccessory) {
 		if (device) {
-			const command = new SetCommand();
+
+			let command: any
+			if (device.deviceType == MideaDeviceType.AirConditioner) {
+				command = new ACSetCommand();
+				command.useFahrenheit = device.useFahrenheit
+				command.targetTemperature = device.targetTemperature;
+				command.swingMode = device.swingMode;
+				command.ecoMode = device.ecoMode
+				command.fanSpeed = device.fanSpeed;
+			} else if (device.deviceType == MideaDeviceType.Dehumidifier) {
+				command = new DehumidifierSetCommand()
+				this.log.debug(`[sendUpdateToDevice] Generated a new command to set targetHumidity to: ${device.targetHumidity}`)
+				command.targetHumidity = device.targetHumidity
+			}
+
 			command.powerState = device.powerState;
-			command.targetTemperature = device.targetTemperature;
-			command.swingMode = device.swingMode;
-			command.fanSpeed = device.fanSpeed;
 			command.operationalMode = device.operationalMode
-			command.useFahrenheit = device.useFahrenheit
+
 			//operational mode for workaround with fan only mode on device
 			const pktBuilder = new PacketBuilder();
 			pktBuilder.command = command;
 			const data = pktBuilder.finalize();
-			this.log.debug("Command: " + JSON.stringify(command));
-			this.log.debug("Command + Header: " + JSON.stringify(data));
-			this.sendCommand(device, data).catch((error) => {
-				this.log.debug(error);
-				this.log.debug("Try to relogin");
-				this.login().then(() => {
+			// this.log.debug("[sendUpdateToDevice] Command: " + JSON.stringify(command));
+			this.log.debug("[sendUpdateToDevice]  Command + Header: " + JSON.stringify(data));
+			try {
+				await this.sendCommand(device, data, '[sendUpdateToDevice] (set new params?) attempt 1/2')
+				this.log.debug('[sendUpdateToDevice] Sent update to device ' + device.name)
+			} catch (err) {
+				// TODO: this should be handled only on invalidSession error. Also all the retry logic could be done better (Promise retry instead of await?)
+				this.log.warn(`[sendUpdateToDevice] Error sending the command: ${err}. Trying to re-login before re-issuing command...`);
+				this.log.debug("[sendUpdateToDevice] Trying to re-login first");
+				try {
+					const loginResponse = await this.login();
 					this.log.debug("Login successful");
-					this.sendCommand(device, data).catch((error) => {
-						this.log.debug("Command still failed after relogin");
-					});
-				}).catch(() => {
-					this.log.debug("Login failed");
-				});
-			});
+					try {
+						await this.sendCommand(device, data, '[sendUpdateToDevice] (set new params?) attempt 2/2')
+					} catch (err) {
+						this.log.error(`[sendUpdateToDevice] sendCommand command still failed after retrying: ${err}`);
+					}
+				} catch (err) {
+					this.log.warn("[sendUpdateToDevice] re-login attempt failed");
+				}
+
+			}
 			//after sending, update because sometimes the api hangs
-			this.updateValues();
+			try {
+				this.log.debug("[sendUpdateToDevice] Fetching again the state of the device after setting new parameters...");
+				this.updateValues();
+			}
+			catch (err) {
+				this.log.error("[sendUpdateToDevice] something went wrong while fetching the state of the device after setting new paramenters: ", err)
+			}			
 		}
 	}
+
 	getDeviceSpecificOverrideValue(deviceId: string, key: string) {
 		if (this.config) {
 			if (this.config.hasOwnProperty('devices')) {
-				for (let i=0; i<this.config.devices.length; i++) {
+				for (let i = 0; i < this.config.devices.length; i++) {
 					if (this.config.devices[i].deviceId == deviceId) {
 						return this.config.devices[i][key];
 					}
@@ -631,13 +430,11 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 		return null;
 	}
 
-
 	configureAccessory(accessory: PlatformAccessory) {
 		this.log.info('Loading accessory from cache:', accessory.displayName);
 		// add the restored accessory to the accessories cache so we can track if it has already been registered
 		this.accessories.push(accessory);
 	}
-
 
 }
 
