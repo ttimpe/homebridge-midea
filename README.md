@@ -1,5 +1,7 @@
 # homebridge-midea
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/TobiasTimpe) – In case you want to support my work :)
+
 Homebridge plugin to control Midea AC units. Still in early development.
 
 
@@ -14,11 +16,11 @@ Add this to the platforms array in your config.json:
 	    "interval": 1,
 	    "devices": [
 	    	{
-	    		"deviceId": "DEVICE_ID"
+	    		"deviceId": "DEVICE_ID",
 	    		"supportedSwingMode": "Vertical",
-				"temperatureSteps": 1,
-				"fanOnlyMode": true,
-				"fanOnlyModeName": "Fan Only Mode"
+				  "temperatureSteps": 1,
+				  "fanOnlyMode": true,
+				  "fanOnlyModeName": "Fan Only Mode"
 	    	}
 	    ]
 	}
@@ -65,3 +67,4 @@ This plugin would not have been possible without the fundamentals that the Midea
 ## Development
 Make changes only on the `src` folder. To build, make sure you have TypeScript installed (already in the devDependencies of package.json) and run `tsc --build tsconfig.json`
 To deploy in homebridge, simply run `npm link` in this folder.
+
