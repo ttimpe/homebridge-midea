@@ -2,60 +2,73 @@
   "pluginAlias": "midea",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "",
+  "headerDisplay": "Homebridge plugin for Midea AC",
   "footerDisplay": "",
   "schema": {
     "type": "object",
     "properties": {
       "user": {
         "title": "Midea account email",
-        "type": "string"
+        "type": "string",
+        "required": true
       },
       "password": {
         "title": "Midea account password",
         "type": "string",
         "x-schema-form": {
-            "type": "password"
+          "type": "password",
+          "required": true
         }
       },
       "interval": {
-        "title": "Update interval in minutes",
-        "type": "number"
+        "title": "Update interval in seconds",
+        "description": "Time in seconds between each status polling of the Midea devices, Default is 30",
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 600
       },
       "devices": {
         "type": "array",
         "items": {
-            "title": "Device",
-            "type": "object",
-            "properties": {
-                "deviceId":{
-                    "title": "Device ID",
-                    "type": "string"
+          "title": "Device",
+          "type": "object",
+          "properties": {
+            "deviceId": {
+              "title": "Device ID",
+              "type": "string"
+            },
+            "supportedSwingModes": {
+              "title": "Supported Swing Modes",
+              "type": "string",
+              "required": true,
+              "oneOf": [
+                {
+                  "title": "None",
+                  "enum": [
+                    "None"
+                  ]
                 },
-                "supportedSwingModes": {
-                    "title": "Supported Swing Modes",
-                    "type": "string",
-                    "required": true,
-                    "oneOf": [
-                        {
-                            "title": "None",
-                            "enum": ["None"]
-                        },
-                    {
-                        "title": "Vertical",
-                        "enum":["Vertical"]
-                    },
-                    {
-                        "title": "Horizontal",
-                        "enum":["Horizontal"]
-                    },
-                    {
-                        "title": "Both",
-                        "enum": ["Both"]
-                    }
-                ]
+                {
+                  "title": "Vertical",
+                  "enum": [
+                    "Vertical"
+                  ]
+                },
+                {
+                  "title": "Horizontal",
+                  "enum": [
+                    "Horizontal"
+                  ]
+                },
+                {
+                  "title": "Both",
+                  "enum": [
+                    "Both"
+                  ]
+                }
+              ]
             }
-            }
+          }
         }
       }
     }
