@@ -25,6 +25,6 @@ export default class ACApplianceResponse extends ApplianceResponse {
     }
     get tempUnit() {
         // This needs a better name, dunno what it actually means
-        return this.data[23] > 0;
+        return (this.data[0x09] & 0x80) > 0;
     }
 }

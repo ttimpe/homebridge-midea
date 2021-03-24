@@ -88,7 +88,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}
 			this.updateInterval = setInterval(() => {
 				this.updateValues();
-			}, this.config['interval'] * 60 * 1000);
+			}, this.config['interval'] * 1000);
 		} catch (err) {
 			this.log.debug('Login failed')
 		}
@@ -351,7 +351,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 						} catch (err) {
 							this.log.error(`[updateValues] sendCommand command still failed after retrying: ${err}`);
 						}
-					} catch(err) {
+					} catch (err) {
 						this.log.error("[updateValues] re-login attempt failed");
 					}
 
@@ -413,7 +413,7 @@ export class MideaPlatform implements DynamicPlatformPlugin {
 			}
 			catch (err) {
 				this.log.error("[sendUpdateToDevice] something went wrong while fetching the state of the device after setting new paramenters: ", err)
-			}			
+			}
 		}
 	}
 
