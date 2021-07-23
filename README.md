@@ -1,5 +1,7 @@
 # homebridge-midea
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://paypal.me/TobiasTimpe) – In case you want to support my work :)
+
 Homebridge plugin to control Midea AC units. Still in early development.
 
 
@@ -16,7 +18,9 @@ Add this to the platforms array in your config.json:
 	    	{
 	    		"deviceId": "DEVICE_ID",
 	    		"supportedSwingMode": "Vertical",
-				"temperatureSteps": 1
+				  "temperatureSteps": 1,
+				  "fanOnlyMode": true,
+				  "fanOnlyModeName": "Fan Only Mode"
 	    	}
 	    ]
 	}
@@ -35,6 +39,9 @@ You have to select which type your device supports
 
 Temperature steps that the device supports. Default is 0.5
 
+### fanOnlyMode & fanOnlyModeName
+
+This allows you to enable a fan-only mode service
 
 
 ## Usage
@@ -55,3 +62,9 @@ This version of ```homebridge-midea``` is a platform and should be able to acces
 
 ## Credits
 This plugin would not have been possible without the fundamentals that the Midea iobroker plugin and all of the other Midea API clients in Ruby and Python provided.
+
+
+## Development
+Make changes only on the `src` folder. To build, make sure you have TypeScript installed (already in the devDependencies of package.json) and run `tsc --build tsconfig.json`
+To deploy in homebridge, simply run `npm link` in this folder.
+

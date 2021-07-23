@@ -1,6 +1,7 @@
 {
   "name": "homebridge-midea",
-  "version": "1.1.2",
+  "version": "1.5.4",
+
   "description": "Homebridge plugin for Midea AC units",
   "repository": {
     "type": "git",
@@ -23,8 +24,13 @@
   "author": "ttimpe",
   "license": "MIT",
   "dependencies": {
-    "request": "^2.88.2",
-    "traverse": "^0.6.6"
+    "axios": "^0.21.1",
+    "axios-cookiejar-support": "^1.0.0",
+    "node-tunnel": "^4.0.0",
+    "querystring": "^0.2.0",
+    "tough-cookie": "^4.0.0",
+    "traverse": "^0.6.6",
+    "tunnel": "0.0.6"
   },
   "keywords": [
     "homebridge",
@@ -35,10 +41,12 @@
     "air conditioner"
   ],
   "devDependencies": {
-    "@types/node": "^14.0.13",
-    "homebridge": "^1.1.0",
-    "typescript": "^3.9.5",
-    "ts-node": "^8.10.2"
+    "@types/tunnel": "0.0.1",
+    "@types/node": "^14.14.6",
+    "@types/tough-cookie": "^4.0.0",
+    "homebridge": "^1.1.6",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
   },
   "scripts": {
     "build": "tsc"
