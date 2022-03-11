@@ -289,8 +289,10 @@ export class MideaAccessory {
 		this.platform.log.debug('Triggered GET handleCoolingThresholdTemperature');
 
 		// set this to a valid value for TargetTemperature
-		const currentValue = this.targetTemperature;
-
+		let currentValue = this.targetTemperature;
+		if (currentValue < 17) {
+			currentValue = 17;
+		}
 		callback(null, currentValue);
 	}
 
